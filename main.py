@@ -1,10 +1,27 @@
 import pygame
 import sys
+import os
 
 SPACE_PRESS_COUNT = 0
 
 
-class Board:
+def load_image(name, color_key=None):
+    fullname = os.path.join('data', name)
+    if not os.path.isfile(fullname):
+        print(f'Файл с изображением {fullname} не существует')
+        sys.exit()
+    image = pygame.image.load(fullname)
+    if color_key is not None:
+        image = image.convert()
+        if color_key == -1:
+            color_key = image.get_at((0, 0))
+        image.set_colorkey(color_key)
+    else:
+        image = image.convert_alpha()
+    return image
+
+
+class Board():
     def __init__(self, width, height):
         self.width = width
         self.height = height
@@ -19,16 +36,16 @@ class Board:
         self.cell_size = cell_size
 
     def render(self, screen):
-        colors = [pygame.Color(0, 0, 0), pygame.Color(0, 255, 0)]
+        colors = [pygame.Color(0, 0, 0), pygame.Color(255, 255, 255)]
         for x in range(self.width):
             for y in range(self.height):
-                pygame.draw.rect(screen, (255, 255, 255),
+                pygame.draw.rect(screen, colors[1],
                                  (x * self.cell_size + self.left,
                                   y * self.cell_size + self.top,
                                   self.cell_size, self.cell_size), 1)
                 pygame.draw.rect(screen, colors[self.board[y][x]], (x * self.cell_size + self.left + 1,
-                                                                    y * self.cell_size + self.top + 1,
-                                                                    self.cell_size - 2, self.cell_size - 2))
+                                  y * self.cell_size + self.top + 1,
+                                  self.cell_size - 2, self.cell_size - 2))
 
     def get_cell(self, mouse_pos):
         x = (mouse_pos[0] - self.left) // self.cell_size
@@ -97,10 +114,85 @@ def main_screen():
 
     board1 = Board(10, 10)
     board1.set_view(45, 85, 35)
-    board1.render(screen)
     board2 = Board(10, 10)
     board2.set_view(440, 85, 35)
-    board2.render(screen)
+    board3 = Board(4, 1)
+    board3.set_view(140, 495, 35)
+    board4 = Board(4, 1)
+    board4.set_view(460, 495, 35)
+
+    all_sprite = pygame.sprite.Group()
+    ship1 = pygame.sprite.Sprite()
+    ship1.image = load_image('small_gor.jpg')
+    ship1.rect = ship1.image.get_rect()
+    all_sprite.add(ship1)
+    ship2 = pygame.sprite.Sprite()
+    ship2.image = load_image('mid_gor.jpg')
+    ship2.rect = ship2.image.get_rect()
+    all_sprite.add(ship2)
+    ship3 = pygame.sprite.Sprite()
+    ship3.image = load_image('mid_max_gor.jpg')
+    ship3.rect = ship3.image.get_rect()
+    all_sprite.add(ship3)
+    ship4 = pygame.sprite.Sprite()
+    ship4.image = load_image('max_gor.jpg')
+    ship4.rect = ship4.image.get_rect()
+    all_sprite.add(ship4)
+
+    ship1vert = pygame.sprite.Sprite()
+    ship1vert.image = load_image('small_vert.jpg')
+    ship1vert.rect = ship1vert.image.get_rect()
+    all_sprite.add(ship1vert)
+    ship2vert = pygame.sprite.Sprite()
+    ship2vert.image = load_image('mid_vert.jpg')
+    ship2vert.rect = ship2vert.image.get_rect()
+    all_sprite.add(ship2vert)
+    ship3vert = pygame.sprite.Sprite()
+    ship3vert.image = load_image('mid_max_vert.jpg')
+    ship3vert.rect = ship3vert.image.get_rect()
+    all_sprite.add(ship3vert)
+    ship4vert = pygame.sprite.Sprite()
+    ship4vert.image = load_image('max_vert.jpg')
+    ship4vert.rect = ship4vert.image.get_rect()
+    all_sprite.add(ship4vert)
+
+    ship1.rect.x = 143
+    ship1.rect.y = 497
+    ship2.rect.x = 177
+    ship2.rect.y = 497
+    ship3.rect.x = 212
+    ship3.rect.y = 497
+    ship4.rect.x = 247
+    ship4.rect.y = 497
+
+    ship1vert.rect.x = 463
+    ship1vert.rect.y = 497
+    ship2vert.rect.x = 497
+    ship2vert.rect.y = 497
+    ship3vert.rect.x = 532
+    ship3vert.rect.y = 497
+    ship4vert.rect.x = 567
+    ship4vert.rect.y = 497
+
+    n = 333
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] >= 495:
+                board3.get_click(event.pos)
+                board4.get_click(event.pos)
+                n = 1
+            if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] <= 470 and n == 1:
+                board1.get_click(event.pos)
+                board2.get_click(event.pos)
+                n = 0
+        board1.render(screen)
+        board2.render(screen)
+        board3.render(screen)
+        board4.render(screen)
+        all_sprite.draw(screen)
+        pygame.display.flip()
 
 
 if __name__ == '__main__':
@@ -117,3 +209,5 @@ if __name__ == '__main__':
                 SPACE_PRESS_COUNT += 1
                 main_screen()
         pygame.display.flip()
+
+pygame.quit()
