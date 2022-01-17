@@ -5,6 +5,12 @@ import os
 SPACE_PRESS_COUNT = 0
 
 
+matrix_1 = [[0] * 10 for i in range(10)]
+matrix_2 = [[0] * 10 for i in range(10)]
+red_flag = False
+flag = False
+
+
 def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
@@ -44,8 +50,8 @@ class Board():
                                   y * self.cell_size + self.top,
                                   self.cell_size, self.cell_size), 1)
                 pygame.draw.rect(screen, colors[self.board[y][x]], (x * self.cell_size + self.left + 1,
-                                  y * self.cell_size + self.top + 1,
-                                  self.cell_size - 2, self.cell_size - 2))
+                                                                    y * self.cell_size + self.top + 1,
+                                                                    self.cell_size - 2, self.cell_size - 2))
 
     def get_cell(self, mouse_pos):
         x = (mouse_pos[0] - self.left) // self.cell_size
@@ -55,18 +61,54 @@ class Board():
         return None
 
     def on_click(self, cell_coords, n, side):
+        global red_flag
         if side == '':  # если сторона не указана, значит эта функция была вызвана не для построения корабля,
             # а для его выбора, поэтому строю как обычно
             self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]
         elif side == 'right':  # проверка на то, в какую сторону строится корабль.
             # в данном случае был выбран горизонтальный корабль, поэтому строиться он будет направо
-            for i in range(n):  # запуская цикл, который идет от кол-ва палуб
-                self.board[cell_coords[1]][cell_coords[0] + i] = 1  # закрашиваю клетку.
+            if cell_coords[0] + n <= 10:
+                for i in range(n):  # запуская цикл, который идет от кол-ва палуб
+                    self.board[cell_coords[1]][cell_coords[0] + i] = 1  # закрашиваю клетку.
+                del_error_f()
+            else:
+                error_f()
                 # переменная i здесь для закрашивания соседних клеток,
                 # то есть сначала, допустим, закрасится клетка 5, потом 5 + 1, потом 5 + 2 и тд
         elif side == 'down':  # абсолютно аналогично, только тут я не дописала. разве что изменяться будет y, а не x
-            for i in range(n):
-                self.board[cell_coords[1]][cell_coords[0]] = 1
+            if cell_coords[1] + n <= 10:
+                for i in range(n):  # нужно поработать с ифами
+                    if matrix_1[cell_coords[1]][cell_coords[0] + i] == 1\
+                            or matrix_1[cell_coords[1] + n][cell_coords[0]] == 2\
+                            or matrix_1[cell_coords[1] - 1][cell_coords[0]] == 2\
+                            or matrix_1[cell_coords[1] + i][cell_coords[0] - 1] == 2\
+                            or matrix_1[cell_coords[1] + i][cell_coords[0] + 1] == 2:
+                        red_flag = True
+                        error_f()
+                if not red_flag:
+                    for i in range(n):
+                        self.board[cell_coords[1] + i][cell_coords[0]] = 1
+                        matrix_1[cell_coords[1] + i][cell_coords[0]] = 1
+                        del_error_f()
+                        if cell_coords[1] + n <= 9:
+                            matrix_1[cell_coords[1] + n][cell_coords[0]] = 2
+                            matrix_1[cell_coords[1] + n][cell_coords[0] + 1] = 2
+                            matrix_1[cell_coords[1] + n][cell_coords[0] - 1] = 2
+                        if cell_coords[1] >= 1:
+                            matrix_1[cell_coords[1] - 1][cell_coords[0]] = 2
+                            matrix_1[cell_coords[1] - 1][cell_coords[0] + 1] = 2
+                            matrix_1[cell_coords[1] - 1][cell_coords[0] - 1] = 2
+                        for i in range(n):
+                            if cell_coords[0] >= 1:
+                                matrix_1[cell_coords[1] + i][cell_coords[0] - 1] = 2
+                            if cell_coords[0] <= 9:
+                                matrix_1[cell_coords[1] + i][cell_coords[0] + 1] = 2
+
+            else:
+                error_f()
+            red_flag = False
+            for elem in matrix_1:
+                print(elem)
 
     def get_click(self, mouse_pos, n, side):
         cell = self.get_cell(mouse_pos)
@@ -77,6 +119,16 @@ class Board():
 def terminate():
     pygame.quit()
     sys.exit()
+
+
+def error_f():
+    font = pygame.font.Font(None, 32)
+    text = font.render('Неправильная расстановка кораблика. Попробуйте снова', True, (255, 255, 255))
+    screen.blit(text, (85, 555))
+
+
+def del_error_f():
+    pygame.draw.rect(screen, (0, 0, 0), (0, 555, 800, 50), 0)
 
 
 def start_screen():
@@ -105,7 +157,7 @@ def start_screen():
 def main_screen():
     screen.fill((0, 0, 0))
     font = pygame.font.Font(None, 46)
-    letters = 'абвгдежзик'  # 'АБВГДЕЖЗИК'
+    letters = 'абвгдежзик'
     letters_x_1 = 12
     letters_x_2 = 408
     letters_y = 88
@@ -194,7 +246,7 @@ def main_screen():
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] >= 495:  # первая проверка того, на что мы нажали,
                 # конкретно тут нажатие на поля с выборами корабликов
-                if event.pos[0] <= 400: # проверка того, что мы нажали на поле с выбором горизонтальных корабликов
+                if event.pos[0] <= 400:  # проверка того, что мы нажали на поле с выбором горизонтальных корабликов
                     board3.get_click(event.pos, 1, side)  # вызываю функцию get_click,
                     # параметры в данном случае не имеют смысла
                     kol = board3.get_cell(event.pos)[0] + 1  # благодаря функции get_cell получаю длину палубы
@@ -240,5 +292,6 @@ if __name__ == '__main__':
                 SPACE_PRESS_COUNT += 1
                 main_screen()
         pygame.display.flip()
+
 
 pygame.quit()
