@@ -55,19 +55,23 @@ class Board():
         return None
 
     def on_click(self, cell_coords, n, side):
-        if side == '':
+        if side == '':  # если сторона не указана, значит эта функция была вызвана не для построения корабля,
+            # а для его выбора, поэтому строю как обычно
             self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]
-        elif side == 'right':
-            for i in range(n):
-                self.board[cell_coords[1]][cell_coords[0] + i] = 1
-        elif side == 'down':
+        elif side == 'right':  # проверка на то, в какую сторону строится корабль.
+            # в данном случае был выбран горизонтальный корабль, поэтому строиться он будет направо
+            for i in range(n):  # запуская цикл, который идет от кол-ва палуб
+                self.board[cell_coords[1]][cell_coords[0] + i] = 1  # закрашиваю клетку.
+                # переменная i здесь для закрашивания соседних клеток,
+                # то есть сначала, допустим, закрасится клетка 5, потом 5 + 1, потом 5 + 2 и тд
+        elif side == 'down':  # абсолютно аналогично, только тут я не дописала. разве что изменяться будет y, а не x
             for i in range(n):
                 self.board[cell_coords[1]][cell_coords[0]] = 1
 
     def get_click(self, mouse_pos, n, side):
         cell = self.get_cell(mouse_pos)
         if cell:
-            self.on_click(cell, n, side)
+            self.on_click(cell, n, side)  # передаю в on_click позицию клика на самом поле, количество палуб и сторону
 
 
 def terminate():
@@ -188,24 +192,32 @@ def main_screen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] >= 495:
-                if event.pos[0] <= 400:
-                    board3.get_click(event.pos, 1, side)
-                    kol = board3.get_cell(event.pos)[0] + 1
-                    side = 'right'
-                elif event.pos[0] >= 460:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] >= 495:  # первая проверка того, на что мы нажали,
+                # конкретно тут нажатие на поля с выборами корабликов
+                if event.pos[0] <= 400: # проверка того, что мы нажали на поле с выбором горизонтальных корабликов
+                    board3.get_click(event.pos, 1, side)  # вызываю функцию get_click,
+                    # параметры в данном случае не имеют смысла
+                    kol = board3.get_cell(event.pos)[0] + 1  # благодаря функции get_cell получаю длину палубы
+                    # так как все кораблики идут слева направо в порядке увеличения размера
+                    side = 'right'  # получаю сторону, в которую будет строится кораблик (вниз или направо)
+                elif event.pos[0] >= 460:  # здесь все аналогично, только для второго поля,
+                    # в котором корабли горизонтальные
                     board4.get_click(event.pos, 1, side)
                     kol = board4.get_cell(event.pos)[0] + 1
                     side = 'down'
-                n = 1
-            if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] <= 470 and n == 1:
-                if event.pos[0] <= 430:
-                    board1.get_click(event.pos, kol, side)
-                elif event.pos[0] >= 431:
-                    board2.get_click(event.pos, kol, side)
-                kol = 1
-                side = ''
-                n = 0
+                n = 1  # указываю для того, чтоб на поля основные (куда ставим кораблики) можно было
+                # нажать только после выбора самого корабля
+            if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] <= 470 and n == 1:  # смотрю, на какое поле
+                # нажал пользователь ( в данном случае на поля для, где и будут стоять сами корабли)
+                if event.pos[0] <= 430:  # проверяю, что пользователь нажал на левое поле
+                    board1.get_click(event.pos, kol, side)  # разрешаю нажатие на клетку, передаю позицию клика мышки,
+                    # количество палуб у кораблика и сторону, в которую будут рисоваться палубы
+                elif event.pos[0] >= 431:  # проверяю, что пользователь нажал на правое поле
+                    board2.get_click(event.pos, kol, side)  # аналогично
+                kol = 1  # обнуляю
+                side = ''  # обнуляю
+                n = 0  # обнуляю
+                # далее см. функцию get_click
         board1.render(screen)
         board2.render(screen)
         board3.render(screen)
