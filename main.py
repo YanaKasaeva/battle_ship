@@ -54,13 +54,20 @@ class Board():
             return x, y
         return None
 
-    def on_click(self, cell_coords):
-        self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]
+    def on_click(self, cell_coords, n, side):
+        if side == '':
+            self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]
+        elif side == 'right':
+            for i in range(n):
+                self.board[cell_coords[1]][cell_coords[0] + i] = 1
+        elif side == 'down':
+            for i in range(n):
+                self.board[cell_coords[1]][cell_coords[0]] = 1
 
-    def get_click(self, mouse_pos):
+    def get_click(self, mouse_pos, n, side):
         cell = self.get_cell(mouse_pos)
         if cell:
-            self.on_click(cell)
+            self.on_click(cell, n, side)
 
 
 def terminate():
@@ -175,17 +182,29 @@ def main_screen():
     ship4vert.rect.y = 497
 
     n = 333
+    side = ''
+    kol = 1
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] >= 495:
-                board3.get_click(event.pos)
-                board4.get_click(event.pos)
+                if event.pos[0] <= 400:
+                    board3.get_click(event.pos, 1, side)
+                    kol = board3.get_cell(event.pos)[0] + 1
+                    side = 'right'
+                elif event.pos[0] >= 460:
+                    board4.get_click(event.pos, 1, side)
+                    kol = board4.get_cell(event.pos)[0] + 1
+                    side = 'down'
                 n = 1
             if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] <= 470 and n == 1:
-                board1.get_click(event.pos)
-                board2.get_click(event.pos)
+                if event.pos[0] <= 430:
+                    board1.get_click(event.pos, kol, side)
+                elif event.pos[0] >= 431:
+                    board2.get_click(event.pos, kol, side)
+                kol = 1
+                side = ''
                 n = 0
         board1.render(screen)
         board2.render(screen)
