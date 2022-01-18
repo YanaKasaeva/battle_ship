@@ -64,14 +64,15 @@ class Board():
         return None
 
     def on_click(self, cell_coords, n, side):
-        global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT
-        if n == 4:
-            if P4_COUNT == 0:
+        global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT  # переменные показывающие количество возможных кораблей тех или иных палуб
+        #  то есть изначально р4 = 1 а после уставноки на поле 4палубного корабля вычитаю один из переменной
+        if n == 4:  # решила использовать n чтобы узнать колво палуб у нажатого корабля
+            if P4_COUNT == 0:  # если переменная равна 0 то выводится сообещин на экран и кораблик не ставится
                 error_count_ships()
             else:
                 P4_COUNT -= 1
-                self.ok_click(cell_coords, n, side)
-
+                self.ok_click(cell_coords, n, side)  # см ниже
+        # далее все по такой же схеме
         elif n == 3:
             if P3_COUNT == 0:
                 error_count_ships()
@@ -93,8 +94,9 @@ class Board():
                 P1_COUNT -= 1
                 self.ok_click(cell_coords, n, side)
 
-    def ok_click(self, cell_coords, n, side):
-        global RED_FLAG
+    def ok_click(self, cell_coords, n, side):  # функцию я создала для удобства. так удобнее изменять код
+        # + как видно выше я вызываю функцию много раз
+        global RED_FLAG  # этот флажок нужен чтобы отследить заняты поля или нет
         '''if side == '':  # если сторона не указана, значит эта функция была вызвана не для построения корабля,
                     # а для его выбора, поэтому строю как обычно
                     self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]'''
@@ -108,19 +110,21 @@ class Board():
                 error_f()
                 # переменная i здесь для закрашивания соседних клеток,
                 # то есть сначала, допустим, закрасится клетка 5, потом 5 + 1, потом 5 + 2 и тд'''
-            if cell_coords[0] + n <= 10:
+            if cell_coords[0] + n <= 10:  # хочу узнать поместится кораблик когда будет достроен вниз
                 for i in range(n):
                     if matrix_1[cell_coords[1]][cell_coords[0] + i] == 1 \
-                            or matrix_1[cell_coords[1]][cell_coords[0] + i] == 2:
-                        RED_FLAG = True
-                        error_place()
+                            or matrix_1[cell_coords[1]][cell_coords[0] + i] == 2:  # смотрю по матрице не совпадает ли
+                        # каждая клетка кораблика с клетками других кораблей(цифра 1) и их соседними клетками(цифра 2)
+                        RED_FLAG = True  # если совпадает то флаг поднят
+                        error_place()  # сообщение об ошибке
 
                 if not RED_FLAG:
-                    for i in range(n):
+                    for i in range(n):  # строю кораблик заношу с марицу его клетки
                         self.board[cell_coords[1]][cell_coords[0] + i] = 1
                         matrix_1[cell_coords[1]][cell_coords[0] + i] = 1
-                        del_error_f()
+                        del_error_f()  # очищаю после на случай если до этого были ошибки
 
+                        # далее заношу в матрицу двойки
                         if cell_coords[0] + n <= 9:
                             matrix_1[cell_coords[1]][cell_coords[0] + n] = 2
                             matrix_1[cell_coords[1] - 1][cell_coords[0] + n] = 2
@@ -139,12 +143,14 @@ class Board():
                             if cell_coords[1] + 1 <= 9:
                                 matrix_1[cell_coords[1] + 1][cell_coords[0] + i] = 2
 
+            # убираю флаг и для удобства вывожу матрицу
             else:
-                error_place()
+                error_place()  # если ошибка есть то вывожу оповещение
             RED_FLAG = False
             for elem in matrix_1:
                 print(elem)
 
+        # тут подход анологичен
         elif side == 'down':  # абсолютно аналогично, только тут я не дописала. разве что изменяться будет y, а не x
             if cell_coords[1] + n <= 10:
                 for i in range(n):
@@ -189,6 +195,7 @@ class Board():
             self.on_click(cell, n, side)  # передаю в on_click позицию клика на самом поле, количество палуб и сторону
 
 
+  # класс для того чтобы в матрицу не заносились данные корабликов для выбора
 class Board_Choose_Ship(Board):
     def on_click(self, cell_coords, n, side):
         self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]
