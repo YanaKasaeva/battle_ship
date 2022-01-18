@@ -67,41 +67,82 @@ class Board():
             self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]
         elif side == 'right':  # проверка на то, в какую сторону строится корабль.
             # в данном случае был выбран горизонтальный корабль, поэтому строиться он будет направо
-            if cell_coords[0] + n <= 10:
+            '''if cell_coords[0] + n <= 10:
                 for i in range(n):  # запуская цикл, который идет от кол-ва палуб
                     self.board[cell_coords[1]][cell_coords[0] + i] = 1  # закрашиваю клетку.
                 del_error_f()
             else:
                 error_f()
                 # переменная i здесь для закрашивания соседних клеток,
-                # то есть сначала, допустим, закрасится клетка 5, потом 5 + 1, потом 5 + 2 и тд
-        elif side == 'down':  # абсолютно аналогично, только тут я не дописала. разве что изменяться будет y, а не x
-            if cell_coords[1] + n <= 10:
-                for i in range(n):  # нужно поработать с ифами
+                # то есть сначала, допустим, закрасится клетка 5, потом 5 + 1, потом 5 + 2 и тд'''
+
+            if cell_coords[0] + n <= 10:
+                for i in range(n):
                     if matrix_1[cell_coords[1]][cell_coords[0] + i] == 1\
-                            or matrix_1[cell_coords[1] + n][cell_coords[0]] == 2\
-                            or matrix_1[cell_coords[1] - 1][cell_coords[0]] == 2\
-                            or matrix_1[cell_coords[1] + i][cell_coords[0] - 1] == 2\
-                            or matrix_1[cell_coords[1] + i][cell_coords[0] + 1] == 2:
+                            or matrix_1[cell_coords[1]][cell_coords[0] + i] == 2:
                         red_flag = True
                         error_f()
+
+                if not red_flag:
+                    for i in range(n):
+                        self.board[cell_coords[1]][cell_coords[0] + i] = 1
+                        matrix_1[cell_coords[1]][cell_coords[0] + i] = 1
+                        del_error_f()
+
+                        if cell_coords[0] + n <= 9:
+                            matrix_1[cell_coords[1]][cell_coords[0] + n] = 2
+                            matrix_1[cell_coords[1] - 1][cell_coords[0] + n] = 2
+                            if cell_coords[1] + 1 <= 9:
+                                matrix_1[cell_coords[1] + 1][cell_coords[0] + n] = 2
+
+                        if cell_coords[0] >= 1:
+                            matrix_1[cell_coords[1]][cell_coords[0] - 1] = 2
+                            matrix_1[cell_coords[1] - 1][cell_coords[0] - 1] = 2
+                            if cell_coords[1] + 1 <= 9:
+                                matrix_1[cell_coords[1] + 1][cell_coords[0] - 1] = 2
+
+                        for i in range(n):
+                            if cell_coords[1] >= 1:
+                                matrix_1[cell_coords[1] - 1][cell_coords[0] + i] = 2
+                            if cell_coords[1] + 1 <= 9:
+                                matrix_1[cell_coords[1] + 1][cell_coords[0] + i] = 2
+
+            else:
+                error_f()
+            red_flag = False
+            for elem in matrix_1:
+                print(elem)
+
+        elif side == 'down':  # абсолютно аналогично, только тут я не дописала. разве что изменяться будет y, а не x
+            if cell_coords[1] + n <= 10:
+                for i in range(n):
+                    if matrix_1[cell_coords[1] + i][cell_coords[0]] == 1\
+                            or matrix_1[cell_coords[1] + i][cell_coords[0]] == 2:
+                        red_flag = True
+                        error_f()
+
                 if not red_flag:
                     for i in range(n):
                         self.board[cell_coords[1] + i][cell_coords[0]] = 1
                         matrix_1[cell_coords[1] + i][cell_coords[0]] = 1
                         del_error_f()
+
                         if cell_coords[1] + n <= 9:
                             matrix_1[cell_coords[1] + n][cell_coords[0]] = 2
-                            matrix_1[cell_coords[1] + n][cell_coords[0] + 1] = 2
                             matrix_1[cell_coords[1] + n][cell_coords[0] - 1] = 2
+                            if cell_coords[0] + 1 <= 9:
+                                matrix_1[cell_coords[1] + n][cell_coords[0] + 1] = 2
+
                         if cell_coords[1] >= 1:
                             matrix_1[cell_coords[1] - 1][cell_coords[0]] = 2
-                            matrix_1[cell_coords[1] - 1][cell_coords[0] + 1] = 2
                             matrix_1[cell_coords[1] - 1][cell_coords[0] - 1] = 2
+                            if cell_coords[0] + 1 <= 9:
+                                matrix_1[cell_coords[1] - 1][cell_coords[0] + 1] = 2
+
                         for i in range(n):
                             if cell_coords[0] >= 1:
                                 matrix_1[cell_coords[1] + i][cell_coords[0] - 1] = 2
-                            if cell_coords[0] <= 9:
+                            if cell_coords[0] + 1 <= 9:
                                 matrix_1[cell_coords[1] + i][cell_coords[0] + 1] = 2
 
             else:
