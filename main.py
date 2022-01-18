@@ -4,10 +4,10 @@ import os
 
 SPACE_PRESS_COUNT = 0
 
-
 matrix_1 = [[0] * 10 for i in range(10)]
 matrix_2 = [[0] * 10 for j in range(10)]
 RED_FLAG = False
+RED_FLAG_POLE = False
 P4_COUNT = 1
 P3_COUNT = 2
 P2_COUNT = 3
@@ -63,7 +63,7 @@ class Board():
             return x, y
         return None
 
-    def on_click(self, cell_coords, n, side):
+    def on_click(self, cell_coords, n, side, pole):
         global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT  # переменные показывающие количество возможных кораблей тех или иных палуб
         #  то есть изначально р4 = 1 а после уставноки на поле 4палубного корабля вычитаю один из переменной
         if n == 4:  # решила использовать n чтобы узнать колво палуб у нажатого корабля
@@ -71,52 +71,38 @@ class Board():
                 error_count_ships()
             else:
                 P4_COUNT -= 1
-                self.ok_click(cell_coords, n, side)  # см ниже
-        # далее все по такой же схеме
+                self.ok_click(cell_coords, n, side, pole)
         elif n == 3:
             if P3_COUNT == 0:
                 error_count_ships()
             else:
                 P3_COUNT -= 1
-                self.ok_click(cell_coords, n, side)
+                self.ok_click(cell_coords, n, side, pole)
 
         elif n == 2:
             if P2_COUNT == 0:
                 error_count_ships()
             else:
                 P2_COUNT -= 1
-                self.ok_click(cell_coords, n, side)
+                self.ok_click(cell_coords, n, side, pole)
 
         elif n == 1:
             if P1_COUNT == 0:
                 error_count_ships()
             else:
                 P1_COUNT -= 1
-                self.ok_click(cell_coords, n, side)
+                self.ok_click(cell_coords, n, side, pole)
 
-    def ok_click(self, cell_coords, n, side):  # функцию я создала для удобства. так удобнее изменять код
-        # + как видно выше я вызываю функцию много раз
-        global RED_FLAG  # этот флажок нужен чтобы отследить заняты поля или нет
-        '''if side == '':  # если сторона не указана, значит эта функция была вызвана не для построения корабля,
-                    # а для его выбора, поэтому строю как обычно
-                    self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]'''
-        if side == 'right':  # проверка на то, в какую сторону строится корабль.
-            # в данном случае был выбран горизонтальный корабль, поэтому строиться он будет направо
-            '''if cell_coords[0] + n <= 10:
-                for i in range(n):  # запуская цикл, который идет от кол-ва палуб
-                    self.board[cell_coords[1]][cell_coords[0] + i] = 1  # закрашиваю клетку.
-                del_error_f()
-            else:
-                error_f()
-                # переменная i здесь для закрашивания соседних клеток,
-                # то есть сначала, допустим, закрасится клетка 5, потом 5 + 1, потом 5 + 2 и тд'''
-            if cell_coords[0] + n <= 10:  # хочу узнать поместится кораблик когда будет достроен вниз
+    def ok_click(self, cell_coords, n, side, pole):
+        global RED_FLAG
+        if side == 'right' and pole == 1:  # здесь как раз таки проверяю,
+            # на каком поле рисовать(из-за различных матриц, да)
+            if cell_coords[0] + n <= 10:
                 for i in range(n):
                     if matrix_1[cell_coords[1]][cell_coords[0] + i] == 1 \
-                            or matrix_1[cell_coords[1]][cell_coords[0] + i] == 2:  # смотрю по матрице не совпадает ли
-                        # каждая клетка кораблика с клетками других кораблей(цифра 1) и их соседними клетками(цифра 2)
-                        RED_FLAG = True  # если совпадает то флаг поднят
-                        error_place()  # сообщение об ошибке
+                            or matrix_1[cell_coords[1]][cell_coords[0] + i] == 2:
+                        RED_FLAG = True
+                        error_place()
 
                 if not RED_FLAG:
                     for i in range(n):  # строю кораблик заношу с марицу его клетки
@@ -150,8 +136,45 @@ class Board():
             for elem in matrix_1:
                 print(elem)
 
-        # тут подход анологичен
-        elif side == 'down':  # абсолютно аналогично, только тут я не дописала. разве что изменяться будет y, а не x
+        if side == 'right' and pole == 2:
+            if cell_coords[0] + n <= 10:  # хочу узнать поместится кораблик когда будет достроен вниз
+                for i in range(n):
+                    if matrix_2[cell_coords[1]][cell_coords[0] + i] == 1 \
+                            or matrix_2[cell_coords[1]][cell_coords[0] + i] == 2:
+                        RED_FLAG = True
+                        error_place()
+
+                if not RED_FLAG:
+                    for i in range(n):
+                        self.board[cell_coords[1]][cell_coords[0] + i] = 1
+                        matrix_2[cell_coords[1]][cell_coords[0] + i] = 1
+                        del_error_f()
+
+                        if cell_coords[0] + n <= 9:
+                            matrix_2[cell_coords[1]][cell_coords[0] + n] = 2
+                            matrix_2[cell_coords[1] - 1][cell_coords[0] + n] = 2
+                            if cell_coords[1] + 1 <= 9:
+                                matrix_2[cell_coords[1] + 1][cell_coords[0] + n] = 2
+
+                        if cell_coords[0] >= 1:
+                            matrix_2[cell_coords[1]][cell_coords[0] - 1] = 2
+                            matrix_2[cell_coords[1] - 1][cell_coords[0] - 1] = 2
+                            if cell_coords[1] + 1 <= 9:
+                                matrix_2[cell_coords[1] + 1][cell_coords[0] - 1] = 2
+
+                        for i in range(n):
+                            if cell_coords[1] >= 1:
+                                matrix_2[cell_coords[1] - 1][cell_coords[0] + i] = 2
+                            if cell_coords[1] + 1 <= 9:
+                                matrix_2[cell_coords[1] + 1][cell_coords[0] + i] = 2
+
+            else:
+                error_place()
+            RED_FLAG = False
+            for elem in matrix_2:
+                print(elem)
+
+        elif side == 'down' and pole == 1:
             if cell_coords[1] + n <= 10:
                 for i in range(n):
                     if matrix_1[cell_coords[1] + i][cell_coords[0]] == 1 \
@@ -189,16 +212,59 @@ class Board():
             for elem in matrix_1:
                 print(elem)
 
-    def get_click(self, mouse_pos, n, side):
+        elif side == 'down' and pole == 2:
+            if cell_coords[1] + n <= 10:
+                for i in range(n):
+                    if matrix_2[cell_coords[1] + i][cell_coords[0]] == 1 \
+                            or matrix_2[cell_coords[1] + i][cell_coords[0]] == 2:
+                        RED_FLAG = True
+                        error_place()
+
+                if not RED_FLAG:
+                    for i in range(n):
+                        self.board[cell_coords[1] + i][cell_coords[0]] = 1
+                        matrix_2[cell_coords[1] + i][cell_coords[0]] = 1
+                        del_error_f()
+
+                        if cell_coords[1] + n <= 9:
+                            matrix_2[cell_coords[1] + n][cell_coords[0]] = 2
+                            matrix_2[cell_coords[1] + n][cell_coords[0] - 1] = 2
+                            if cell_coords[0] + 1 <= 9:
+                                matrix_2[cell_coords[1] + n][cell_coords[0] + 1] = 2
+
+                        if cell_coords[1] >= 1:
+                            matrix_2[cell_coords[1] - 1][cell_coords[0]] = 2
+                            matrix_2[cell_coords[1] - 1][cell_coords[0] - 1] = 2
+                            if cell_coords[0] + 1 <= 9:
+                                matrix_2[cell_coords[1] - 1][cell_coords[0] + 1] = 2
+
+                        for i in range(n):
+                            if cell_coords[0] >= 1:
+                                matrix_2[cell_coords[1] + i][cell_coords[0] - 1] = 2
+                            if cell_coords[0] + 1 <= 9:
+                                matrix_2[cell_coords[1] + i][cell_coords[0] + 1] = 2
+
+            else:
+                error_place()
+            RED_FLAG = False
+            for elem in matrix_2:
+                print(elem)
+
+    def get_click(self, mouse_pos, n, side, pole):
         cell = self.get_cell(mouse_pos)
         if cell:
-            self.on_click(cell, n, side)  # передаю в on_click позицию клика на самом поле, количество палуб и сторону
+            self.on_click(cell, n, side,
+                          pole)
 
 
-  # класс для того чтобы в матрицу не заносились данные корабликов для выбора
+# класс для того чтобы в матрицу не заносились данные корабликов для выбора
 class Board_Choose_Ship(Board):
-    def on_click(self, cell_coords, n, side):
+    def on_click(self, cell_coords, n, side, board):
         self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]
+
+
+def del_error_f():
+    pygame.draw.rect(screen, (0, 0, 0), (0, 555, 800, 50), 0)
 
 
 def terminate():
@@ -207,19 +273,17 @@ def terminate():
 
 
 def error_place():
+    del_error_f()
     font = pygame.font.Font(None, 32)
     text = font.render('Неправильная установка кораблика. Попробуйте снова', True, (255, 255, 255))
     screen.blit(text, (85, 555))
 
 
 def error_count_ships():
+    del_error_f()
     font = pygame.font.Font(None, 32)
     text = font.render('Вы уже использовали все кораблики этого типа. Выберете другой', True, (255, 255, 255))
     screen.blit(text, (40, 555))
-
-
-def del_error_f():
-    pygame.draw.rect(screen, (0, 0, 0), (0, 555, 800, 50), 0)
 
 
 def start_screen():
@@ -331,36 +395,37 @@ def main_screen():
     n = 333
     side = ''
     kol = 1
+    press_w = 0
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] >= 495:  # первая проверка того, на что мы нажали,
-                # конкретно тут нажатие на поля с выборами корабликов
-                if event.pos[0] <= 400:  # проверка того, что мы нажали на поле с выбором горизонтальных корабликов
-                    board3.get_click(event.pos, 1, side)  # вызываю функцию get_click,
-                    # параметры в данном случае не имеют смысла
-                    kol = board3.get_cell(event.pos)[0] + 1  # благодаря функции get_cell получаю длину палубы
-                    # так как все кораблики идут слева направо в порядке увеличения размера
-                    side = 'right'  # получаю сторону, в которую будет строится кораблик (вниз или направо)
-                elif event.pos[0] >= 460:  # здесь все аналогично, только для второго поля,
-                    # в котором корабли горизонтальные
-                    board4.get_click(event.pos, 1, side)
+            if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] >= 495:
+                if event.pos[0] <= 400:
+                    board3.get_click(event.pos, 1, side, 0)
+                    kol = board3.get_cell(event.pos)[0] + 1
+                    side = 'right'
+                elif event.pos[0] >= 460:
+                    board4.get_click(event.pos, 1, side, 0)
                     kol = board4.get_cell(event.pos)[0] + 1
                     side = 'down'
-                n = 1  # указываю для того, чтоб на поля основные (куда ставим кораблики) можно было
-                # нажать только после выбора самого корабля
-            if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] <= 470 and n == 1:  # смотрю, на какое поле
-                # нажал пользователь ( в данном случае на поля для, где и будут стоять сами корабли)
-                if event.pos[0] <= 430:  # проверяю, что пользователь нажал на левое поле
-                    board1.get_click(event.pos, kol, side)  # разрешаю нажатие на клетку, передаю позицию клика мышки,
-                    # количество палуб у кораблика и сторону, в которую будут рисоваться палубы
-                elif event.pos[0] >= 431:  # проверяю, что пользователь нажал на правое поле
-                    board2.get_click(event.pos, kol, side)  # аналогично
-                kol = 1  # обнуляю
-                side = ''  # обнуляю
-                n = 0  # обнуляю
-                # далее см. функцию get_click
+                n = 1
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_w:  # функция, чтоб понять, что W нажата,
+                # т.е. для переключения на второе поле
+                global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT, RED_FLAG_POLE
+                P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT = 1, 2, 3, 4  # возрождаю первоначальные значения для нового поля
+                press_w = 1  # переменная, которая будет указателем для второго поля, что ему можно активироваться
+                RED_FLAG_POLE = True  # флаг, благодаря которому после передачи в него значения True
+                # первое поле изменять будет нельзя
+            if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] <= 470 and n == 1:
+                if event.pos[0] <= 430 and not RED_FLAG_POLE:
+                    board1.get_click(event.pos, kol, side, 1)  # единички и двойки тут как раз-таки для определения
+                    # в функции отрисовки полей (левое или правое участвует в процессе)
+                elif event.pos[0] >= 431 and press_w == 1:
+                    board2.get_click(event.pos, kol, side, 2)
+                kol = 1
+                side = ''
+                n = 0
         board1.render(screen)
         board2.render(screen)
         board3.render(screen)
@@ -383,6 +448,5 @@ if __name__ == '__main__':
                 SPACE_PRESS_COUNT += 1
                 main_screen()
         pygame.display.flip()
-
 
 pygame.quit()
