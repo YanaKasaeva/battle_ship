@@ -6,9 +6,12 @@ SPACE_PRESS_COUNT = 0
 
 
 matrix_1 = [[0] * 10 for i in range(10)]
-matrix_2 = [[0] * 10 for i in range(10)]
-red_flag = False
-flag = False
+matrix_2 = [[0] * 10 for j in range(10)]
+RED_FLAG = False
+P4_COUNT = 1
+P3_COUNT = 2
+P2_COUNT = 3
+P1_COUNT = 4
 
 
 def load_image(name, color_key=None):
@@ -61,11 +64,41 @@ class Board():
         return None
 
     def on_click(self, cell_coords, n, side):
-        global red_flag
-        if side == '':  # если сторона не указана, значит эта функция была вызвана не для построения корабля,
-            # а для его выбора, поэтому строю как обычно
-            self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]
-        elif side == 'right':  # проверка на то, в какую сторону строится корабль.
+        global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT
+        if n == 4:
+            if P4_COUNT == 0:
+                error_count_ships()
+            else:
+                P4_COUNT -= 1
+                self.ok_click(cell_coords, n, side)
+
+        elif n == 3:
+            if P3_COUNT == 0:
+                error_count_ships()
+            else:
+                P3_COUNT -= 1
+                self.ok_click(cell_coords, n, side)
+
+        elif n == 2:
+            if P2_COUNT == 0:
+                error_count_ships()
+            else:
+                P2_COUNT -= 1
+                self.ok_click(cell_coords, n, side)
+
+        elif n == 1:
+            if P1_COUNT == 0:
+                error_count_ships()
+            else:
+                P1_COUNT -= 1
+                self.ok_click(cell_coords, n, side)
+
+    def ok_click(self, cell_coords, n, side):
+        global RED_FLAG
+        '''if side == '':  # если сторона не указана, значит эта функция была вызвана не для построения корабля,
+                    # а для его выбора, поэтому строю как обычно
+                    self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]'''
+        if side == 'right':  # проверка на то, в какую сторону строится корабль.
             # в данном случае был выбран горизонтальный корабль, поэтому строиться он будет направо
             '''if cell_coords[0] + n <= 10:
                 for i in range(n):  # запуская цикл, который идет от кол-ва палуб
@@ -75,15 +108,14 @@ class Board():
                 error_f()
                 # переменная i здесь для закрашивания соседних клеток,
                 # то есть сначала, допустим, закрасится клетка 5, потом 5 + 1, потом 5 + 2 и тд'''
-
             if cell_coords[0] + n <= 10:
                 for i in range(n):
-                    if matrix_1[cell_coords[1]][cell_coords[0] + i] == 1\
+                    if matrix_1[cell_coords[1]][cell_coords[0] + i] == 1 \
                             or matrix_1[cell_coords[1]][cell_coords[0] + i] == 2:
-                        red_flag = True
-                        error_f()
+                        RED_FLAG = True
+                        error_place()
 
-                if not red_flag:
+                if not RED_FLAG:
                     for i in range(n):
                         self.board[cell_coords[1]][cell_coords[0] + i] = 1
                         matrix_1[cell_coords[1]][cell_coords[0] + i] = 1
@@ -108,20 +140,20 @@ class Board():
                                 matrix_1[cell_coords[1] + 1][cell_coords[0] + i] = 2
 
             else:
-                error_f()
-            red_flag = False
+                error_place()
+            RED_FLAG = False
             for elem in matrix_1:
                 print(elem)
 
         elif side == 'down':  # абсолютно аналогично, только тут я не дописала. разве что изменяться будет y, а не x
             if cell_coords[1] + n <= 10:
                 for i in range(n):
-                    if matrix_1[cell_coords[1] + i][cell_coords[0]] == 1\
+                    if matrix_1[cell_coords[1] + i][cell_coords[0]] == 1 \
                             or matrix_1[cell_coords[1] + i][cell_coords[0]] == 2:
-                        red_flag = True
-                        error_f()
+                        RED_FLAG = True
+                        error_place()
 
-                if not red_flag:
+                if not RED_FLAG:
                     for i in range(n):
                         self.board[cell_coords[1] + i][cell_coords[0]] = 1
                         matrix_1[cell_coords[1] + i][cell_coords[0]] = 1
@@ -146,8 +178,8 @@ class Board():
                                 matrix_1[cell_coords[1] + i][cell_coords[0] + 1] = 2
 
             else:
-                error_f()
-            red_flag = False
+                error_place()
+            RED_FLAG = False
             for elem in matrix_1:
                 print(elem)
 
@@ -157,15 +189,26 @@ class Board():
             self.on_click(cell, n, side)  # передаю в on_click позицию клика на самом поле, количество палуб и сторону
 
 
+class Board_Choose_Ship(Board):
+    def on_click(self, cell_coords, n, side):
+        self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]
+
+
 def terminate():
     pygame.quit()
     sys.exit()
 
 
-def error_f():
+def error_place():
     font = pygame.font.Font(None, 32)
-    text = font.render('Неправильная расстановка кораблика. Попробуйте снова', True, (255, 255, 255))
+    text = font.render('Неправильная установка кораблика. Попробуйте снова', True, (255, 255, 255))
     screen.blit(text, (85, 555))
+
+
+def error_count_ships():
+    font = pygame.font.Font(None, 32)
+    text = font.render('Вы уже использовали все кораблики этого типа. Выберете другой', True, (255, 255, 255))
+    screen.blit(text, (40, 555))
 
 
 def del_error_f():
@@ -220,9 +263,9 @@ def main_screen():
     board1.set_view(45, 85, 35)
     board2 = Board(10, 10)
     board2.set_view(440, 85, 35)
-    board3 = Board(4, 1)
+    board3 = Board_Choose_Ship(4, 1)
     board3.set_view(140, 495, 35)
-    board4 = Board(4, 1)
+    board4 = Board_Choose_Ship(4, 1)
     board4.set_view(460, 495, 35)
 
     all_sprite = pygame.sprite.Group()
