@@ -70,184 +70,133 @@ class Board():
             if P4_COUNT == 0:  # если переменная равна 0 то выводится сообещин на экран и кораблик не ставится
                 error_count_ships()
             else:
-                P4_COUNT -= 1
                 self.ok_click(cell_coords, n, side, pole)
         elif n == 3:
             if P3_COUNT == 0:
                 error_count_ships()
             else:
-                P3_COUNT -= 1
                 self.ok_click(cell_coords, n, side, pole)
 
         elif n == 2:
             if P2_COUNT == 0:
                 error_count_ships()
             else:
-                P2_COUNT -= 1
                 self.ok_click(cell_coords, n, side, pole)
 
         elif n == 1:
             if P1_COUNT == 0:
                 error_count_ships()
             else:
-                P1_COUNT -= 1
                 self.ok_click(cell_coords, n, side, pole)
 
     def ok_click(self, cell_coords, n, side, pole):
-        global RED_FLAG
-        if side == 'right' and pole == 1:  # здесь как раз таки проверяю,
+        global RED_FLAG, P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT
+        if pole == 1:
+            self.matrix = matrix_1
+        else:
+            self.matrix = matrix_2
+
+        if side == 'right':  # здесь как раз таки проверяю,
             # на каком поле рисовать(из-за различных матриц, да)
             if cell_coords[0] + n <= 10:
                 for i in range(n):
-                    if matrix_1[cell_coords[1]][cell_coords[0] + i] == 1 \
-                            or matrix_1[cell_coords[1]][cell_coords[0] + i] == 2:
+                    if self.matrix[cell_coords[1]][cell_coords[0] + i] == 1 \
+                            or self.matrix[cell_coords[1]][cell_coords[0] + i] == 2:
                         RED_FLAG = True
                         error_place()
 
                 if not RED_FLAG:
+                    if n == 4:
+                        P4_COUNT -= 1
+                    if n == 3:
+                        P3_COUNT -= 1
+                    if n == 2:
+                        P2_COUNT -= 1
+                    if n == 1:
+                        P1_COUNT -= 1
+
                     for i in range(n):  # строю кораблик заношу с марицу его клетки
                         self.board[cell_coords[1]][cell_coords[0] + i] = 1
-                        matrix_1[cell_coords[1]][cell_coords[0] + i] = 1
+                        self.matrix[cell_coords[1]][cell_coords[0] + i] = 1
                         del_error_f()  # очищаю после на случай если до этого были ошибки
 
                         # далее заношу в матрицу двойки
                         if cell_coords[0] + n <= 9:
-                            matrix_1[cell_coords[1]][cell_coords[0] + n] = 2
-                            matrix_1[cell_coords[1] - 1][cell_coords[0] + n] = 2
+                            self.matrix[cell_coords[1]][cell_coords[0] + n] = 2
                             if cell_coords[1] + 1 <= 9:
-                                matrix_1[cell_coords[1] + 1][cell_coords[0] + n] = 2
+                                self.matrix[cell_coords[1] + 1][cell_coords[0] + n] = 2
+                            if cell_coords[1] - 1 >= 1:
+                                self.matrix[cell_coords[1] - 1][cell_coords[0] + n] = 2
 
                         if cell_coords[0] >= 1:
-                            matrix_1[cell_coords[1]][cell_coords[0] - 1] = 2
-                            matrix_1[cell_coords[1] - 1][cell_coords[0] - 1] = 2
+                            self.matrix[cell_coords[1]][cell_coords[0] - 1] = 2
                             if cell_coords[1] + 1 <= 9:
-                                matrix_1[cell_coords[1] + 1][cell_coords[0] - 1] = 2
+                                self.matrix[cell_coords[1] + 1][cell_coords[0] - 1] = 2
+                            if cell_coords[1] - 1 >= 1:
+                                self.matrix[cell_coords[1] - 1][cell_coords[0] - 1] = 2
 
                         for i in range(n):
                             if cell_coords[1] >= 1:
-                                matrix_1[cell_coords[1] - 1][cell_coords[0] + i] = 2
+                                self.matrix[cell_coords[1] - 1][cell_coords[0] + i] = 2
                             if cell_coords[1] + 1 <= 9:
-                                matrix_1[cell_coords[1] + 1][cell_coords[0] + i] = 2
+                                self.matrix[cell_coords[1] + 1][cell_coords[0] + i] = 2
 
             # убираю флаг и для удобства вывожу матрицу
             else:
                 error_place()  # если ошибка есть то вывожу оповещение
+
             RED_FLAG = False
             for elem in matrix_1:
                 print(elem)
 
-        if side == 'right' and pole == 2:
-            if cell_coords[0] + n <= 10:  # хочу узнать поместится кораблик когда будет достроен вниз
-                for i in range(n):
-                    if matrix_2[cell_coords[1]][cell_coords[0] + i] == 1 \
-                            or matrix_2[cell_coords[1]][cell_coords[0] + i] == 2:
-                        RED_FLAG = True
-                        error_place()
-
-                if not RED_FLAG:
-                    for i in range(n):
-                        self.board[cell_coords[1]][cell_coords[0] + i] = 1
-                        matrix_2[cell_coords[1]][cell_coords[0] + i] = 1
-                        del_error_f()
-
-                        if cell_coords[0] + n <= 9:
-                            matrix_2[cell_coords[1]][cell_coords[0] + n] = 2
-                            matrix_2[cell_coords[1] - 1][cell_coords[0] + n] = 2
-                            if cell_coords[1] + 1 <= 9:
-                                matrix_2[cell_coords[1] + 1][cell_coords[0] + n] = 2
-
-                        if cell_coords[0] >= 1:
-                            matrix_2[cell_coords[1]][cell_coords[0] - 1] = 2
-                            matrix_2[cell_coords[1] - 1][cell_coords[0] - 1] = 2
-                            if cell_coords[1] + 1 <= 9:
-                                matrix_2[cell_coords[1] + 1][cell_coords[0] - 1] = 2
-
-                        for i in range(n):
-                            if cell_coords[1] >= 1:
-                                matrix_2[cell_coords[1] - 1][cell_coords[0] + i] = 2
-                            if cell_coords[1] + 1 <= 9:
-                                matrix_2[cell_coords[1] + 1][cell_coords[0] + i] = 2
-
-            else:
-                error_place()
-            RED_FLAG = False
-            for elem in matrix_2:
-                print(elem)
-
-        elif side == 'down' and pole == 1:
+        elif side == 'down':
             if cell_coords[1] + n <= 10:
                 for i in range(n):
-                    if matrix_1[cell_coords[1] + i][cell_coords[0]] == 1 \
-                            or matrix_1[cell_coords[1] + i][cell_coords[0]] == 2:
+                    if self.matrix[cell_coords[1] + i][cell_coords[0]] == 1 \
+                            or self.matrix[cell_coords[1] + i][cell_coords[0]] == 2:
                         RED_FLAG = True
                         error_place()
 
                 if not RED_FLAG:
+                    if n == 4:
+                        P4_COUNT -= 1
+                    if n == 3:
+                        P3_COUNT -= 1
+                    if n == 2:
+                        P2_COUNT -= 1
+                    if n == 1:
+                        P1_COUNT -= 1
+
                     for i in range(n):
                         self.board[cell_coords[1] + i][cell_coords[0]] = 1
-                        matrix_1[cell_coords[1] + i][cell_coords[0]] = 1
+                        self.matrix[cell_coords[1] + i][cell_coords[0]] = 1
                         del_error_f()
 
                         if cell_coords[1] + n <= 9:
-                            matrix_1[cell_coords[1] + n][cell_coords[0]] = 2
-                            matrix_1[cell_coords[1] + n][cell_coords[0] - 1] = 2
+                            self.matrix[cell_coords[1] + n][cell_coords[0]] = 2
                             if cell_coords[0] + 1 <= 9:
-                                matrix_1[cell_coords[1] + n][cell_coords[0] + 1] = 2
+                                self.matrix[cell_coords[1] + n][cell_coords[0] + 1] = 2
+                            if cell_coords[0] - 1 >= 1:
+                                self.matrix[cell_coords[1] + n][cell_coords[0] - 1] = 2
 
                         if cell_coords[1] >= 1:
-                            matrix_1[cell_coords[1] - 1][cell_coords[0]] = 2
-                            matrix_1[cell_coords[1] - 1][cell_coords[0] - 1] = 2
+                            self.matrix[cell_coords[1] - 1][cell_coords[0]] = 2
                             if cell_coords[0] + 1 <= 9:
-                                matrix_1[cell_coords[1] - 1][cell_coords[0] + 1] = 2
+                                self.matrix[cell_coords[1] - 1][cell_coords[0] + 1] = 2
+                            if cell_coords[0] - 1 >= 1:
+                                self.matrix[cell_coords[1] - 1][cell_coords[0] - 1] = 2
 
                         for i in range(n):
                             if cell_coords[0] >= 1:
-                                matrix_1[cell_coords[1] + i][cell_coords[0] - 1] = 2
+                                self.matrix[cell_coords[1] + i][cell_coords[0] - 1] = 2
                             if cell_coords[0] + 1 <= 9:
-                                matrix_1[cell_coords[1] + i][cell_coords[0] + 1] = 2
+                                self.matrix[cell_coords[1] + i][cell_coords[0] + 1] = 2
 
             else:
                 error_place()
+
             RED_FLAG = False
             for elem in matrix_1:
-                print(elem)
-
-        elif side == 'down' and pole == 2:
-            if cell_coords[1] + n <= 10:
-                for i in range(n):
-                    if matrix_2[cell_coords[1] + i][cell_coords[0]] == 1 \
-                            or matrix_2[cell_coords[1] + i][cell_coords[0]] == 2:
-                        RED_FLAG = True
-                        error_place()
-
-                if not RED_FLAG:
-                    for i in range(n):
-                        self.board[cell_coords[1] + i][cell_coords[0]] = 1
-                        matrix_2[cell_coords[1] + i][cell_coords[0]] = 1
-                        del_error_f()
-
-                        if cell_coords[1] + n <= 9:
-                            matrix_2[cell_coords[1] + n][cell_coords[0]] = 2
-                            matrix_2[cell_coords[1] + n][cell_coords[0] - 1] = 2
-                            if cell_coords[0] + 1 <= 9:
-                                matrix_2[cell_coords[1] + n][cell_coords[0] + 1] = 2
-
-                        if cell_coords[1] >= 1:
-                            matrix_2[cell_coords[1] - 1][cell_coords[0]] = 2
-                            matrix_2[cell_coords[1] - 1][cell_coords[0] - 1] = 2
-                            if cell_coords[0] + 1 <= 9:
-                                matrix_2[cell_coords[1] - 1][cell_coords[0] + 1] = 2
-
-                        for i in range(n):
-                            if cell_coords[0] >= 1:
-                                matrix_2[cell_coords[1] + i][cell_coords[0] - 1] = 2
-                            if cell_coords[0] + 1 <= 9:
-                                matrix_2[cell_coords[1] + i][cell_coords[0] + 1] = 2
-
-            else:
-                error_place()
-            RED_FLAG = False
-            for elem in matrix_2:
                 print(elem)
 
     def get_click(self, mouse_pos, n, side, pole):
@@ -284,6 +233,20 @@ def error_count_ships():
     font = pygame.font.Font(None, 32)
     text = font.render('Вы уже использовали все кораблики этого типа. Выберете другой', True, (255, 255, 255))
     screen.blit(text, (40, 555))
+
+
+def error_wrong_pole():
+    del_error_f()
+    font = pygame.font.Font(None, 32)
+    text = font.render('Вы ставите кораблик не на свое поле', True, (255, 255, 255))
+    screen.blit(text, (230, 555))
+
+
+def error_before_w():
+    del_error_f()
+    font = pygame.font.Font(None, 32)
+    text = font.render('Вы поставили еще не все корабли', True, (255, 255, 255))
+    screen.blit(text, (240, 555))
 
 
 def start_screen():
@@ -410,19 +373,24 @@ def main_screen():
                     kol = board4.get_cell(event.pos)[0] + 1
                     side = 'down'
                 n = 1
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_w:  # функция, чтоб понять, что W нажата,
-                # т.е. для переключения на второе поле
-                global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT, RED_FLAG_POLE
-                P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT = 1, 2, 3, 4  # возрождаю первоначальные значения для нового поля
-                press_w = 1  # переменная, которая будет указателем для второго поля, что ему можно активироваться
-                RED_FLAG_POLE = True  # флаг, благодаря которому после передачи в него значения True
-                # первое поле изменять будет нельзя
+            global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT, RED_FLAG_POLE
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
+                if P4_COUNT == 0 and P3_COUNT == 0 and P2_COUNT == 0 and P1_COUNT == 0:  # функция, чтоб понять, что W нажата,
+                    # т.е. для переключения на второе поле
+                    P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT = 1, 2, 3, 4  # возрождаю первоначальные значения для нового поля
+                    press_w = 1  # переменная, которая будет указателем для второго поля, что ему можно активироваться
+                    RED_FLAG_POLE = True  # флаг, благодаря которому после передачи в него значения True
+                    # первое поле изменять будет нельзя
+                else:
+                    error_before_w()
             if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] <= 470 and n == 1:
                 if event.pos[0] <= 430 and not RED_FLAG_POLE:
                     board1.get_click(event.pos, kol, side, 1)  # единички и двойки тут как раз-таки для определения
                     # в функции отрисовки полей (левое или правое участвует в процессе)
                 elif event.pos[0] >= 431 and press_w == 1:
                     board2.get_click(event.pos, kol, side, 2)
+                else:
+                    error_wrong_pole()
                 kol = 1
                 side = ''
                 n = 0
