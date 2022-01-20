@@ -126,14 +126,14 @@ class Board():
                             self.matrix[cell_coords[1]][cell_coords[0] + n] = 2
                             if cell_coords[1] + 1 <= 9:
                                 self.matrix[cell_coords[1] + 1][cell_coords[0] + n] = 2
-                            if cell_coords[1] - 1 >= 1:
+                            if cell_coords[1] - 1 >= 0:
                                 self.matrix[cell_coords[1] - 1][cell_coords[0] + n] = 2
 
                         if cell_coords[0] >= 1:
                             self.matrix[cell_coords[1]][cell_coords[0] - 1] = 2
                             if cell_coords[1] + 1 <= 9:
                                 self.matrix[cell_coords[1] + 1][cell_coords[0] - 1] = 2
-                            if cell_coords[1] - 1 >= 1:
+                            if cell_coords[1] - 1 >= 0:
                                 self.matrix[cell_coords[1] - 1][cell_coords[0] - 1] = 2
 
                         for i in range(n):
@@ -177,14 +177,14 @@ class Board():
                             self.matrix[cell_coords[1] + n][cell_coords[0]] = 2
                             if cell_coords[0] + 1 <= 9:
                                 self.matrix[cell_coords[1] + n][cell_coords[0] + 1] = 2
-                            if cell_coords[0] - 1 >= 1:
+                            if cell_coords[0] - 1 >= 0:
                                 self.matrix[cell_coords[1] + n][cell_coords[0] - 1] = 2
 
                         if cell_coords[1] >= 1:
                             self.matrix[cell_coords[1] - 1][cell_coords[0]] = 2
                             if cell_coords[0] + 1 <= 9:
                                 self.matrix[cell_coords[1] - 1][cell_coords[0] + 1] = 2
-                            if cell_coords[0] - 1 >= 1:
+                            if cell_coords[0] - 1 >= 0:
                                 self.matrix[cell_coords[1] - 1][cell_coords[0] - 1] = 2
 
                         for i in range(n):
