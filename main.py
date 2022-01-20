@@ -3,6 +3,7 @@ import sys
 import os
 
 SPACE_PRESS_COUNT = 0
+W_PRESS_COUNT = 0
 
 matrix_1 = [[0] * 10 for i in range(10)]
 matrix_2 = [[0] * 10 for j in range(10)]
@@ -212,6 +213,16 @@ class Board_Choose_Ship(Board):
         self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]
 
 
+BOARD1 = Board(10, 10)
+BOARD1.set_view(45, 85, 35)
+BOARD2 = Board(10, 10)
+BOARD2.set_view(440, 85, 35)
+BOARD3 = Board_Choose_Ship(4, 1)
+BOARD3.set_view(140, 495, 35)
+BOARD4 = Board_Choose_Ship(4, 1)
+BOARD4.set_view(460, 495, 35)
+
+
 def del_error_f():
     pygame.draw.rect(screen, (0, 0, 0), (0, 555, 800, 50), 0)
 
@@ -249,17 +260,27 @@ def error_before_w():
     screen.blit(text, (240, 555))
 
 
+def hide_pole(pole):
+    global BOARD1, BOARD2
+    if pole == 1:
+        BOARD1 = Board(10, 10)
+        BOARD1.set_view(45, 85, 35)
+    elif pole == 2:
+        BOARD2 = Board(10, 10)
+        BOARD2.set_view(440, 85, 35)
+
+
 def start_screen():
     screen.fill((0, 0, 0))
     font_1 = pygame.font.Font(None, 50)
     font_2 = pygame.font.Font(None, 32)
-    rules = ['Морской бой', 'Нажмите "пробел", чтобы начать игру',
+    rules = ['Морской бой',
              'Игра рассчитана на двух человек, играющих на одном устройстве', 'Первым расставляет корабли PLAYER 1',
-             'Чтобы это сделать, нужно нажать на корабль,', 'а затем на клетки поля, куда вы хотите его поместить',
-             'Чтобы зафиксировать местоположение корабля, нажмите "W"', 'После расстановки кораблей, нажмите "пробел"',
-             'Первым ходит PLAYER 1',
+             'Чтобы это сделать, нужно нажать на корабль,', 'а затем на клетку поля, откуда будет построен кораблик',
+             'Чтобы зафиксировать местоположение всех кораблей, нажмите "w"',
+             'Тогда корабли будет расставлять PLAYER 2', 'Первым ходит PLAYER 1',
              'Чтобы сделать ход, нажмите на клетку, куда вы хотите выстрелить', 'После победы нажмите "пробел",',
-             'чтобы увидеть результаты игры']
+             'чтобы увидеть результаты игры', 'Нажмите "пробел", чтобы начать игру']
     y = 15
     for elem in rules:
         if elem == 'Морской бой':
@@ -273,6 +294,7 @@ def start_screen():
 
 
 def main_screen():
+    global BOARD1, BOARD2, BOARD3, BOARD4, W_PRESS_COUNT
     screen.fill((0, 0, 0))
     font = pygame.font.Font(None, 46)
     letters = 'абвгдежзик'
@@ -292,15 +314,6 @@ def main_screen():
     name_2 = font_names.render("PLAYER 2", True, (0, 255, 255))
     screen.blit(name_1, (55, 5))
     screen.blit(name_2, (450, 5))
-
-    board1 = Board(10, 10)
-    board1.set_view(45, 85, 35)
-    board2 = Board(10, 10)
-    board2.set_view(440, 85, 35)
-    board3 = Board_Choose_Ship(4, 1)
-    board3.set_view(140, 495, 35)
-    board4 = Board_Choose_Ship(4, 1)
-    board4.set_view(460, 495, 35)
 
     all_sprite = pygame.sprite.Group()
     ship1 = pygame.sprite.Sprite()
@@ -358,19 +371,18 @@ def main_screen():
     n = 333
     side = ''
     kol = 1
-    press_w = 0
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] >= 495:
                 if event.pos[0] <= 400:
-                    board3.get_click(event.pos, 1, side, 0)
-                    kol = board3.get_cell(event.pos)[0] + 1
+                    BOARD3.get_click(event.pos, 1, side, 0)
+                    kol = BOARD3.get_cell(event.pos)[0] + 1
                     side = 'right'
                 elif event.pos[0] >= 460:
-                    board4.get_click(event.pos, 1, side, 0)
-                    kol = board4.get_cell(event.pos)[0] + 1
+                    BOARD4.get_click(event.pos, 1, side, 0)
+                    kol = BOARD4.get_cell(event.pos)[0] + 1
                     side = 'down'
                 n = 1
             global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT, RED_FLAG_POLE
@@ -378,28 +390,33 @@ def main_screen():
                 if P4_COUNT == 0 and P3_COUNT == 0 and P2_COUNT == 0 and P1_COUNT == 0:  # функция, чтоб понять, что W нажата,
                     # т.е. для переключения на второе поле
                     P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT = 1, 2, 3, 4  # возрождаю первоначальные значения для нового поля
-                    press_w = 1  # переменная, которая будет указателем для второго поля, что ему можно активироваться
+                    hide_pole(1)
+                    W_PRESS_COUNT = 1  # переменная, которая будет указателем для второго поля, что ему можно активироваться
                     RED_FLAG_POLE = True  # флаг, благодаря которому после передачи в него значения True
                     # первое поле изменять будет нельзя
                 else:
                     error_before_w()
             if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] <= 470 and n == 1:
                 if event.pos[0] <= 430 and not RED_FLAG_POLE:
-                    board1.get_click(event.pos, kol, side, 1)  # единички и двойки тут как раз-таки для определения
+                    BOARD1.get_click(event.pos, kol, side, 1)  # единички и двойки тут как раз-таки для определения
                     # в функции отрисовки полей (левое или правое участвует в процессе)
-                elif event.pos[0] >= 431 and press_w == 1:
-                    board2.get_click(event.pos, kol, side, 2)
+                elif event.pos[0] >= 431 and W_PRESS_COUNT == 1:
+                    BOARD2.get_click(event.pos, kol, side, 2)
                 else:
                     error_wrong_pole()
                 kol = 1
                 side = ''
                 n = 0
-        board1.render(screen)
-        board2.render(screen)
-        board3.render(screen)
-        board4.render(screen)
+        BOARD1.render(screen)
+        BOARD2.render(screen)
+        BOARD3.render(screen)
+        BOARD4.render(screen)
         all_sprite.draw(screen)
         pygame.display.flip()
+
+
+def main_screen2():
+    pass
 
 
 if __name__ == '__main__':
@@ -415,6 +432,8 @@ if __name__ == '__main__':
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) and SPACE_PRESS_COUNT == 0:
                 SPACE_PRESS_COUNT += 1
                 main_screen()
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_w) and W_PRESS_COUNT == 2:
+                main_screen2()
         pygame.display.flip()
 
 pygame.quit()
