@@ -371,29 +371,31 @@ def main_screen():
     n = 333
     side = ''
     kol = 1
+    w_kol = 0
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] >= 495:
-                if event.pos[0] <= 400:
+                if 140 <= event.pos[0] <= 280:
                     BOARD3.get_click(event.pos, 1, side, 0)
                     kol = BOARD3.get_cell(event.pos)[0] + 1
                     side = 'right'
-                elif event.pos[0] >= 460:
+                elif 460 <= event.pos[0] <= 600:
                     BOARD4.get_click(event.pos, 1, side, 0)
                     kol = BOARD4.get_cell(event.pos)[0] + 1
                     side = 'down'
                 n = 1
             global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT, RED_FLAG_POLE
             if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
-                if P4_COUNT == 0 and P3_COUNT == 0 and P2_COUNT == 0 and P1_COUNT == 0:  # функция, чтоб понять, что W нажата,
+                if P4_COUNT == 0 and P3_COUNT == 0 and P2_COUNT == 0 and P1_COUNT == 0 and w_kol == 0:  # функция, чтоб понять, что W нажата,
                     # т.е. для переключения на второе поле
                     P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT = 1, 2, 3, 4  # возрождаю первоначальные значения для нового поля
                     hide_pole(1)
                     W_PRESS_COUNT = 1  # переменная, которая будет указателем для второго поля, что ему можно активироваться
                     RED_FLAG_POLE = True  # флаг, благодаря которому после передачи в него значения True
                     # первое поле изменять будет нельзя
+                    w_kol = 1
                 else:
                     error_before_w()
             if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] <= 470 and n == 1:
