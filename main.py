@@ -277,6 +277,16 @@ def hide_pole(pole):
         BOARD2.set_view(440, 85, 35)
 
 
+def error_queue():
+    font_names = pygame.font.SysFont('arial', 45)
+    error = font_names.render("Сейчас ходит другой игрок!", True, (255, 0, 0))
+    screen.blit(error, (140, 440))
+
+
+def del_error_queue():
+    pygame.draw.rect(screen, (0, 0, 0), (140, 440, 570, 60), 0)
+
+
 def player(n):
     pygame.draw.rect(screen, (0, 0, 0), (225, 500, 270, 100), 0)
     font_names = pygame.font.SysFont('arial', 45)
@@ -475,6 +485,7 @@ def game_window():
     screen.blit(hod, (55, 500))
 
     n = 0
+    player(n)
 
     while True:
         for event in pygame.event.get():
@@ -482,7 +493,19 @@ def game_window():
                 terminate()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print(1)
+                del_error_queue()
+                if event.pos[0] <= 430 and n % 2 != 0:
+                    print('слева')
+                    n += 1
+                elif event.pos[0] <= 430 and n % 2 == 0:
+                    error_queue()
+
+                if event.pos[0] >= 431 and n % 2 == 0:
+                    print('справа')
+                    n += 1
+                elif event.pos[0] >= 431 and n % 2 != 0:
+                    error_queue()
+
                 player(n)
                 n += 1
         BOARD1.render(screen)
