@@ -20,17 +20,12 @@ ALL_SPRITE = pygame.sprite.Group()
 
 def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
-    '''if not os.path.isfile(fullname):
-        print(f'Файл с изображением {fullname} не существует')
-        sys.exit()'''
     image = pygame.image.load(fullname)
-    '''if color_key is not None:
+    if color_key is not None:
         image = image.convert()
         if color_key == -1:
             color_key = image.get_at((0, 0))
         image.set_colorkey(color_key)
-    else:
-        image = image.convert_alpha()'''
     return image
 
 
@@ -45,7 +40,7 @@ class Particle(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.velocity = [dx, dy]
         self.rect.x, self.rect.y = pos
-        self.gravity = 10
+        self.gravity = 2
 
     def update(self):
         self.velocity[1] += self.gravity
@@ -246,12 +241,11 @@ class Board():
     def fire(self, cell, pole):
         if pole == 1:
             self.matrix = matrix_1
-        else:
+        elif pole == 2:
             self.matrix = matrix_2
         if self.matrix[cell[1]][cell[0]] == 1:
             print('попал')
             create_particles(get_coords(cell, pole))
-            #  draw_point(cell, pole)
             self.matrix[cell[1]][cell[0]] = 3
         else:
             print('не попал')
@@ -290,7 +284,7 @@ def get_coords(cell, pole):
 
 
 def draw_point(cell, pole):
-    pygame.draw.circle(screen, (0, 255, 255), get_coords(cell, pole), 60)
+    pygame.draw.circle(screen, (0, 255, 255), get_coords(cell, pole), 5)
 
 
 def del_error_f():
@@ -533,7 +527,7 @@ def game_window():
     hod = font_names.render("Ходит:", True, (255, 255, 255))
     screen.blit(hod, (55, 500))
 
-    winner = 'нет'
+    WINNER = 'нет'
     n = 0
     player(n)
 
@@ -558,17 +552,18 @@ def game_window():
                     error_queue()
 
                 player(n)
+
         BOARD1.render(screen)
-        '''for i in range(1, 11):
-            for j in range(1, 11):
+        for i in range(10):
+            for j in range(10):
                 if matrix_1[i][j] == 3:
-                    draw_point(matrix_1[i][j], 1)'''
+                    draw_point((j, i), 1)
 
         BOARD2.render(screen)
-        ''''for i in range(1, 11):
-            for j in range(1, 11):
+        for i in range(10):
+            for j in range(10):
                 if matrix_2[i][j] == 3:
-                    draw_point(matrix_2[i][j], 1)'''''
+                    draw_point((j, i), 1)
         pygame.display.flip()
 
 
