@@ -251,9 +251,11 @@ class Board():
         if self.matrix[cell[1]][cell[0]] == 1:
             print('попал')
             create_particles(get_coords(cell, pole))
-            draw_point(cell, pole)
+            #  draw_point(cell, pole)
+            self.matrix[cell[1]][cell[0]] = 3
         else:
             print('не попал')
+            self.matrix[cell[1]][cell[0]] = 3
         # тут надо по прототипу функции ok_click найти двойки рядом и вывести,
         # можешь этого не делать, я после репета вставлю
         # сделать проверку на то, что туда уже стреляли(3 в матрицу занести и проверять)
@@ -280,15 +282,15 @@ class Board_Choose_Ship(Board):
 
 def get_coords(cell, pole):
     if pole == 1:
-        x = cell[0] * 35 + 45 - 35 // 2
+        x = (cell[0] + 1) * 35 + 45 - 35 // 2
     else:
-        x = cell[0] * 35 + 440 - 35 // 2
-    y = cell[1] * 35 + 85 - 35 // 2
+        x = (cell[0] + 1) * 35 + 440 - 35 // 2
+    y = (cell[1] + 1) * 35 + 85 - 35 // 2
     return x, y
 
 
 def draw_point(cell, pole):
-    pygame.draw.circle(screen, (0, 255, 255), get_coords(cell, pole), 2)
+    pygame.draw.circle(screen, (0, 255, 255), get_coords(cell, pole), 60)
 
 
 def del_error_f():
@@ -557,7 +559,16 @@ def game_window():
 
                 player(n)
         BOARD1.render(screen)
+        '''for i in range(1, 11):
+            for j in range(1, 11):
+                if matrix_1[i][j] == 3:
+                    draw_point(matrix_1[i][j], 1)'''
+
         BOARD2.render(screen)
+        ''''for i in range(1, 11):
+            for j in range(1, 11):
+                if matrix_2[i][j] == 3:
+                    draw_point(matrix_2[i][j], 1)'''''
         pygame.display.flip()
 
 
