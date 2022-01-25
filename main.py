@@ -8,15 +8,17 @@ W_PRESS_COUNT = 0
 
 matrix_1 = [[0] * 10 for i in range(10)]
 matrix_2 = [[0] * 10 for j in range(10)]
+colors_point = [pygame.Color(255, 0, 0), pygame.Color(255, 255, 255)]
+
 RED_FLAG = False
 RED_FLAG_POLE = False
 UNCLICK = False
-colors_point = [pygame.Color(255, 0, 0), pygame.Color(0, 255, 0)]
-success = ''
+
 P4_COUNT = 1
 P3_COUNT = 2
 P2_COUNT = 3
 P1_COUNT = 4
+
 ALL_SPRITE = pygame.sprite.Group()
 
 
@@ -93,15 +95,14 @@ class Board():
         return None
 
     def on_click(self, cell_coords, n, side, pole, pos):
-        global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT, UNCLICK  # переменные показывающие количество возможных кораблей тех или иных палуб
-        #  то есть изначально р4 = 1 а после уставноки на поле 4палубного корабля вычитаю один из переменной
+        global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT, UNCLICK
         UNCLICK = True
         if side == 'right':
             BOARD3.on_click('', 0, 0, 0, pos)
         elif side == 'down':
             BOARD4.on_click('', 0, 0, 0, pos)
-        if n == 4:  # решила использовать n чтобы узнать колво палуб у нажатого корабля
-            if P4_COUNT == 0:  # если переменная равна 0 то выводится сообещин на экран и кораблик не ставится
+        if n == 4:
+            if P4_COUNT == 0:
                 error_count_ships()
             else:
                 self.ok_click(cell_coords, n, side, pole, pos)
@@ -110,13 +111,11 @@ class Board():
                 error_count_ships()
             else:
                 self.ok_click(cell_coords, n, side, pole, pos)
-
         elif n == 2:
             if P2_COUNT == 0:
                 error_count_ships()
             else:
                 self.ok_click(cell_coords, n, side, pole, pos)
-
         elif n == 1:
             if P1_COUNT == 0:
                 error_count_ships()
@@ -129,9 +128,7 @@ class Board():
             self.matrix = matrix_1
         else:
             self.matrix = matrix_2
-
-        if side == 'right':  # здесь как раз таки проверяю,
-            # на каком поле рисовать(из-за различных матриц, да)
+        if side == 'right':
             if cell_coords[0] + n <= 10:
                 for i in range(n):
                     if self.matrix[cell_coords[1]][cell_coords[0] + i] == 1 \
@@ -151,12 +148,11 @@ class Board():
                     if n == 1:
                         P1_COUNT -= 1
 
-                    for i in range(n):  # строю кораблик заношу с марицу его клетки
+                    for i in range(n):
                         self.board[cell_coords[1]][cell_coords[0] + i] = 1
                         self.matrix[cell_coords[1]][cell_coords[0] + i] = 1
-                        del_error_f()  # очищаю после на случай если до этого были ошибки
+                        del_error_f()
 
-                        # далее заношу в матрицу двойки
                         if cell_coords[0] + n <= 9:
                             self.matrix[cell_coords[1]][cell_coords[0] + n] = 2
                             if cell_coords[1] + 1 <= 9:
@@ -177,9 +173,8 @@ class Board():
                             if cell_coords[1] + 1 <= 9:
                                 self.matrix[cell_coords[1] + 1][cell_coords[0] + i] = 2
 
-            # убираю флаг и для удобства вывожу матрицу
             else:
-                error_place()  # если ошибка есть то вывожу оповещение
+                error_place()
 
             RED_FLAG = False
 
@@ -241,25 +236,19 @@ class Board():
                           pole, pos)
 
     def fire(self, cell, pole):
-        global success
         if pole == 1:
             self.matrix = matrix_1
         elif pole == 2:
             self.matrix = matrix_2
-        if self.matrix[cell[1]][cell[0]] == 1:
+        if self.matrix[cell[1]][cell[0]] == 4 or self.matrix[cell[1]][cell[0]] == 3:
+            error_same_cell()
+        elif self.matrix[cell[1]][cell[0]] == 1:
             print('попал')
             create_particles(get_coords(cell, pole))
-            self.matrix[cell[1]][cell[0]] = 3
-            success = 'yes'
+            self.matrix[cell[1]][cell[0]] = 4
         else:
             print('не попал')
             self.matrix[cell[1]][cell[0]] = 3
-            success = 'no'
-        # тут надо по прототипу функции ok_click найти двойки рядом и вывести,
-        # можешь этого не делать, я после репета вставлю
-        # сделать проверку на то, что туда уже стреляли(3 в матрицу занести и проверять)
-        # сделать чтобы попавший игрок ходил снова
-        # еще нажатия не работают: если два раза нажать на кораблик а потом на поле, то он все равно поставится
 
     def coor_fire(self, mouse_pos, side):
         cell = self.get_cell(mouse_pos)
@@ -289,11 +278,11 @@ def get_coords(cell, pole):
 
 
 def draw_point_success(cell, pole):
-    pygame.draw.circle(screen, colors_point[1], get_coords(cell, pole), 5)
+    pygame.draw.circle(screen, colors_point[0], get_coords(cell, pole), 5)
 
 
 def draw_point_unsuccess(cell, pole):
-    pygame.draw.circle(screen, colors_point[0], get_coords(cell, pole), 5)
+    pygame.draw.circle(screen, colors_point[1], get_coords(cell, pole), 5)
 
 
 def del_error_f():
@@ -349,8 +338,14 @@ def error_queue():
     screen.blit(error, (140, 440))
 
 
-def del_error_queue():
+def del_error_game_window():
     pygame.draw.rect(screen, (0, 0, 0), (140, 440, 580, 60), 0)
+
+
+def error_same_cell():
+    font_names = pygame.font.SysFont('arial', 45)
+    error = font_names.render("Вы уже сюда стреляли", True, (255, 0, 0))
+    screen.blit(error, (140, 440))
 
 
 def player(n):
@@ -546,46 +541,38 @@ def game_window():
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN:
 
-                if event.pos[0] <= 430 and n % 2 != 0:  # проверка, чья очередь
+                if event.pos[0] <= 430 and n % 2 != 0:
                     n += 1
-                    BOARD1.coor_fire(event.pos, 1)  # вызываю по координате функцию выстрела, внизу аналогично
-                    del_error_queue()
+                    BOARD1.coor_fire(event.pos, 1)
+                    del_error_game_window()
                 elif event.pos[0] <= 430 and n % 2 == 0:
                     error_queue()
 
-                if event.pos[0] >= 431 and n % 2 == 0:  # проверка, чья очередь
+                if event.pos[0] >= 431 and n % 2 == 0:
                     n += 1
                     BOARD2.coor_fire(event.pos, 2)
-                    del_error_queue()
+                    del_error_game_window()
                 elif event.pos[0] >= 431 and n % 2 != 0:
                     error_queue()
 
                 player(n)
 
-        if success == 'yes':
-            BOARD1.render(screen)
-            for i in range(10):
-                for j in range(10):
-                    if matrix_1[i][j] == 3:
-                        draw_point_success((j, i), 1)
+        BOARD1.render(screen)
+        for i in range(10):
+            for j in range(10):
+                if matrix_1[i][j] == 3:
+                    draw_point_unsuccess((j, i), 1)
+                elif matrix_1[i][j] == 4:
+                    draw_point_success((j, i), 1)
 
-            BOARD2.render(screen)
-            for i in range(10):
-                for j in range(10):
-                    if matrix_2[i][j] == 3:
-                        draw_point_success((j, i), 2)
-        else:
-            BOARD1.render(screen)
-            for i in range(10):
-                for j in range(10):
-                    if matrix_1[i][j] == 3:
-                        draw_point_unsuccess((j, i), 1)
+        BOARD2.render(screen)
+        for i in range(10):
+            for j in range(10):
+                if matrix_2[i][j] == 3:
+                    draw_point_unsuccess((j, i), 2)
+                if matrix_2[i][j] == 4:
+                    draw_point_success((j, i), 2)
 
-            BOARD2.render(screen)
-            for i in range(10):
-                for j in range(10):
-                    if matrix_2[i][j] == 3:
-                        draw_point_unsuccess((j, i), 2)
         pygame.display.flip()
 
 
