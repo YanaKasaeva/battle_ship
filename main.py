@@ -11,6 +11,8 @@ matrix_2 = [[0] * 10 for j in range(10)]
 RED_FLAG = False
 RED_FLAG_POLE = False
 UNCLICK = False
+colors_point = [pygame.Color(255, 0, 0), pygame.Color(0, 255, 0)]
+success = ''
 P4_COUNT = 1
 P3_COUNT = 2
 P2_COUNT = 3
@@ -239,6 +241,7 @@ class Board():
                           pole, pos)
 
     def fire(self, cell, pole):
+        global success
         if pole == 1:
             self.matrix = matrix_1
         elif pole == 2:
@@ -247,9 +250,11 @@ class Board():
             print('попал')
             create_particles(get_coords(cell, pole))
             self.matrix[cell[1]][cell[0]] = 3
+            success = 'yes'
         else:
             print('не попал')
             self.matrix[cell[1]][cell[0]] = 3
+            success = 'no'
         # тут надо по прототипу функции ok_click найти двойки рядом и вывести,
         # можешь этого не делать, я после репета вставлю
         # сделать проверку на то, что туда уже стреляли(3 в матрицу занести и проверять)
@@ -283,8 +288,12 @@ def get_coords(cell, pole):
     return x, y
 
 
-def draw_point(cell, pole):
-    pygame.draw.circle(screen, (0, 255, 255), get_coords(cell, pole), 5)
+def draw_point_success(cell, pole):
+    pygame.draw.circle(screen, colors_point[1], get_coords(cell, pole), 5)
+
+
+def draw_point_unsuccess(cell, pole):
+    pygame.draw.circle(screen, colors_point[0], get_coords(cell, pole), 5)
 
 
 def del_error_f():
@@ -553,17 +562,30 @@ def game_window():
 
                 player(n)
 
-        BOARD1.render(screen)
-        for i in range(10):
-            for j in range(10):
-                if matrix_1[i][j] == 3:
-                    draw_point((j, i), 1)
+        if success == 'yes':
+            BOARD1.render(screen)
+            for i in range(10):
+                for j in range(10):
+                    if matrix_1[i][j] == 3:
+                        draw_point_success((j, i), 1)
 
-        BOARD2.render(screen)
-        for i in range(10):
-            for j in range(10):
-                if matrix_2[i][j] == 3:
-                    draw_point((j, i), 2)
+            BOARD2.render(screen)
+            for i in range(10):
+                for j in range(10):
+                    if matrix_2[i][j] == 3:
+                        draw_point_success((j, i), 2)
+        else:
+            BOARD1.render(screen)
+            for i in range(10):
+                for j in range(10):
+                    if matrix_1[i][j] == 3:
+                        draw_point_unsuccess((j, i), 1)
+
+            BOARD2.render(screen)
+            for i in range(10):
+                for j in range(10):
+                    if matrix_2[i][j] == 3:
+                        draw_point_unsuccess((j, i), 2)
         pygame.display.flip()
 
 
