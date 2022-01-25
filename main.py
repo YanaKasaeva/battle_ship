@@ -217,6 +217,24 @@ class Board():
             self.on_click(cell, n, side,
                           pole, pos)
 
+    def fire(self, cell, side):
+        if side == 1:
+            self.matrix = matrix_1
+        else:
+            self.matrix = matrix_2
+        if self.matrix[cell[1]][cell[0]] == 1:
+            print('попал')
+        else:
+            print('не попал')
+        # тут надо по прототипу функции ok_click найти двойки рядом и вывести,
+        # можешь этого не делать, я после репета вставлю
+
+    def coor_fire(self, mouse_pos, side):
+        cell = self.get_cell(mouse_pos)
+        if cell:
+            self.fire(cell, side)
+        print(mouse_pos)
+
 
 # класс для того чтобы в матрицу не заносились данные корабликов для выбора
 class Board_Choose_Ship(Board):
@@ -284,7 +302,7 @@ def error_queue():
 
 
 def del_error_queue():
-    pygame.draw.rect(screen, (0, 0, 0), (140, 440, 570, 60), 0)
+    pygame.draw.rect(screen, (0, 0, 0), (140, 440, 580, 60), 0)
 
 
 def player(n):
@@ -491,23 +509,23 @@ def game_window():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-
             if event.type == pygame.MOUSEBUTTONDOWN:
-                del_error_queue()
-                if event.pos[0] <= 430 and n % 2 != 0:
-                    print('слева')
+
+                if event.pos[0] <= 430 and n % 2 != 0:  # проверка, чья очередь
                     n += 1
+                    BOARD1.coor_fire(event.pos, 1)  # вызываю по координате функцию выстрела, внизу аналогично
+                    del_error_queue()
                 elif event.pos[0] <= 430 and n % 2 == 0:
                     error_queue()
 
-                if event.pos[0] >= 431 and n % 2 == 0:
-                    print('справа')
+                if event.pos[0] >= 431 and n % 2 == 0:  # проверка, чья очередь
                     n += 1
+                    BOARD2.coor_fire(event.pos, 2)
+                    del_error_queue()
                 elif event.pos[0] >= 431 and n % 2 != 0:
                     error_queue()
 
                 player(n)
-                n += 1
         BOARD1.render(screen)
         BOARD2.render(screen)
         pygame.display.flip()
