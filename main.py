@@ -563,7 +563,7 @@ def game_window():
         for i in range(10):
             for j in range(10):
                 if matrix_2[i][j] == 3:
-                    draw_point((j, i), 1)
+                    draw_point((j, i), 2)
         pygame.display.flip()
 
 
