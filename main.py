@@ -5,6 +5,12 @@ import random
 
 SPACE_PRESS_COUNT = 0
 W_PRESS_COUNT = 0
+MOUSE_PRESS_LEFT = 0
+MOUSE_PRESS_RIGHT = 0
+LEFT_SHIPS = 20
+RIGHT_SHIPS = 20
+WINNER = ''
+HOD = 0
 
 matrix_1 = [[0] * 10 for i in range(10)]
 matrix_2 = [[0] * 10 for j in range(10)]
@@ -13,6 +19,7 @@ colors_point = [pygame.Color(255, 0, 0), pygame.Color(255, 255, 255)]
 RED_FLAG = False
 RED_FLAG_POLE = False
 UNCLICK = False
+UP = 0
 
 P4_COUNT = 1
 P3_COUNT = 2
@@ -95,8 +102,10 @@ class Board():
         return None
 
     def on_click(self, cell_coords, n, side, pole, pos):
-        global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT, UNCLICK
+        global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT, UNCLICK, UP
         UNCLICK = True
+        # if UP % 2 == 0:
+        # error_choose()
         if side == 'right':
             BOARD3.on_click('', 0, 0, 0, pos)
         elif side == 'down':
@@ -236,6 +245,7 @@ class Board():
                           pole, pos)
 
     def fire(self, cell, pole):
+        global LEFT_SHIPS, RIGHT_SHIPS, HOD
         if pole == 1:
             self.matrix = matrix_1
         elif pole == 2:
@@ -246,6 +256,11 @@ class Board():
             print('попал')
             create_particles(get_coords(cell, pole))
             self.matrix[cell[1]][cell[0]] = 4
+            if pole == 1:
+                LEFT_SHIPS -= 1
+            elif pole == 2:
+                RIGHT_SHIPS -= 1
+            HOD += 1
         else:
             print('не попал')
             self.matrix[cell[1]][cell[0]] = 3
@@ -260,7 +275,7 @@ class Board():
 class Board_Choose_Ship(Board):
 
     def on_click(self, cell_coords, n, side, board, pos):
-        global UNCLICK
+        global UNCLICK, UP
         if UNCLICK:
             self.board[pos[1]][pos[0]] = 0
             UNCLICK = False
@@ -299,6 +314,13 @@ def error_place():
     font = pygame.font.Font(None, 32)
     text = font.render('Неправильная установка кораблика. Попробуйте снова', True, (255, 255, 255))
     screen.blit(text, (85, 555))
+
+
+def error_choose():
+    del_error_f()
+    font = pygame.font.Font(None, 32)
+    text = font.render('Вы не выбрали кораблик', True, (255, 255, 255))
+    screen.blit(text, (240, 555))
 
 
 def error_count_ships():
@@ -481,12 +503,20 @@ def main_screen():
             if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] >= 495:
                 if 140 <= event.pos[0] <= 280 and 495 <= event.pos[1] <= 530:
                     BOARD3.get_click(event.pos, 1, side, 0, pos)
-                    kol = BOARD3.get_cell(event.pos)[0] + 1
+                    cell = BOARD3.get_cell(event.pos)
+                    if cell is None:
+                        pass
+                    else:
+                        kol = cell[0] + 1
                     side = 'right'
                     pos = BOARD3.get_cell(event.pos)
                 elif 460 <= event.pos[0] <= 600 and 495 <= event.pos[1] <= 530:
                     BOARD4.get_click(event.pos, 1, side, 0, pos)
-                    kol = BOARD4.get_cell(event.pos)[0] + 1
+                    cell = BOARD4.get_cell(event.pos)
+                    if cell is None:
+                        pass
+                    else:
+                        kol = cell[0] + 1
                     side = 'down'
                     pos = BOARD4.get_cell(event.pos)
                 n = 1
@@ -531,31 +561,40 @@ def game_window():
     hod = font_names.render("Ходит:", True, (255, 255, 255))
     screen.blit(hod, (55, 500))
 
-    WINNER = 'нет'
-    n = 0
-    player(n)
+    global MOUSE_PRESS_LEFT, MOUSE_PRESS_RIGHT, WINNER, HOD
+    player(HOD)
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+            player(HOD)
             if event.type == pygame.MOUSEBUTTONDOWN:
 
-                if event.pos[0] <= 430 and n % 2 != 0:
-                    n += 1
+                if event.pos[0] <= 430 and HOD % 2 != 0:
+                    HOD += 1
+                    MOUSE_PRESS_RIGHT += 1
                     BOARD1.coor_fire(event.pos, 1)
                     del_error_game_window()
-                elif event.pos[0] <= 430 and n % 2 == 0:
+                elif event.pos[0] <= 430 and HOD % 2 == 0:
                     error_queue()
 
-                if event.pos[0] >= 431 and n % 2 == 0:
-                    n += 1
+                if event.pos[0] >= 431 and HOD % 2 == 0:
+                    HOD += 1
+                    MOUSE_PRESS_LEFT += 1
                     BOARD2.coor_fire(event.pos, 2)
                     del_error_game_window()
-                elif event.pos[0] >= 431 and n % 2 != 0:
+                elif event.pos[0] >= 431 and HOD % 2 != 0:
                     error_queue()
 
-                player(n)
+            if LEFT_SHIPS == 0:
+                hod = MOUSE_PRESS_RIGHT
+                WINNER = 'Player 2'
+                end_window(hod)
+            elif RIGHT_SHIPS == 0:
+                hod = MOUSE_PRESS_LEFT
+                WINNER = 'Player 1'
+                end_window(hod)
 
         BOARD1.render(screen)
         for i in range(10):
@@ -576,14 +615,14 @@ def game_window():
         pygame.display.flip()
 
 
-def end_window():
+def end_window(hod):
     global WINNER
     screen.fill((0, 0, 0))
     font_1 = pygame.font.Font(None, 50)
     font_2 = pygame.font.Font(None, 32)
     results = ['Результаты игры',
-               f'Победил: {WINNER}', 'Осталось кораблей на поле: ?',
-               'Всего было сделано ходов: ?']
+               f'Победил: {WINNER}',
+               f'Всего было сделано ходов: {hod}']
     y = 15
     for elem in results:
         if elem == 'Результаты игры':
@@ -594,6 +633,12 @@ def end_window():
         text_y = y
         screen.blit(text, (text_x, text_y))
         y += 50
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    terminate()
+                screen.blit(text, (text_x, text_y))
+            pygame.display.flip()
 
 
 if __name__ == '__main__':
@@ -609,9 +654,6 @@ if __name__ == '__main__':
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) and SPACE_PRESS_COUNT == 0:
                 SPACE_PRESS_COUNT = 1
                 main_screen()
-            if (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE)\
-                    and SPACE_PRESS_COUNT == 1 and W_PRESS_COUNT == 2:
-                end_window()
         pygame.display.flip()
 
 pygame.quit()
