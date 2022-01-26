@@ -379,7 +379,7 @@ def del_error_game_window():
 def error_same_cell():
     font_names = pygame.font.SysFont('arial', 45)
     error = font_names.render("Вы уже сюда стреляли", True, (255, 0, 0))
-    screen.blit(error, (140, 440))
+    screen.blit(error, (160, 440))
 
 
 def player(n):
@@ -403,6 +403,7 @@ BOARD4.set_view(460, 495, 35)
 
 
 def start_screen():
+    global SPACE_PRESS_COUNT
     screen.fill((0, 0, 0))
     font_1 = pygame.font.Font(None, 50)
     font_2 = pygame.font.Font(None, 32)
@@ -423,6 +424,14 @@ def start_screen():
         text_y = y
         screen.blit(text, (text_x, text_y))
         y += 50
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) and SPACE_PRESS_COUNT == 0:
+                SPACE_PRESS_COUNT = 1
+                main_screen()
+        pygame.display.flip()
 
 
 def boards():
@@ -538,6 +547,7 @@ def main_screen():
             global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT, RED_FLAG_POLE
             if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
                 if P4_COUNT == 0 and P3_COUNT == 0 and P2_COUNT == 0 and P1_COUNT == 0 and w_kol == 0:
+                    del_error_f()
                     P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT = 1, 2, 3, 4
                     hide_pole(1)
                     W_PRESS_COUNT = 1
@@ -589,16 +599,16 @@ def game_window():
                 if event.pos[0] <= 430 and HOD % 2 != 0:
                     HOD += 1
                     MOUSE_PRESS_RIGHT += 1
-                    BOARD1.coor_fire(event.pos, 1)
                     del_error_game_window()
+                    BOARD1.coor_fire(event.pos, 1)
                 elif event.pos[0] <= 430 and HOD % 2 == 0:
                     error_queue()
 
                 if event.pos[0] >= 431 and HOD % 2 == 0:
                     HOD += 1
                     MOUSE_PRESS_LEFT += 1
-                    BOARD2.coor_fire(event.pos, 2)
                     del_error_game_window()
+                    BOARD2.coor_fire(event.pos, 2)
                 elif event.pos[0] >= 431 and HOD % 2 != 0:
                     error_queue()
 
@@ -633,8 +643,8 @@ def game_window():
 def end_window(hod):
     global WINNER
     screen.fill((0, 0, 0))
-    font_1 = pygame.font.Font(None, 50)
-    font_2 = pygame.font.Font(None, 32)
+    font_1 = pygame.font.Font(None, 60)
+    font_2 = pygame.font.Font(None, 42)
     results = ['Результаты игры',
                f'Победил: {WINNER}',
                f'Всего было сделано ходов: {hod}']
@@ -644,16 +654,16 @@ def end_window(hod):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            y = 15
+            y = 35
             for elem in results:
-                if elem == 'Результаты игры':
+                if elem == 'Результаты игры:':
                     text = font_1.render(elem, True, (0, 255, 255))
                 else:
                     text = font_2.render(elem, True, (255, 255, 255))
                 text_x = width // 2 - text.get_width() // 2
                 text_y = y
                 screen.blit(text, (text_x, text_y))
-                y += 50
+                y += 100
 
         pygame.display.flip()
 
@@ -664,13 +674,5 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption("Касаева Яна; Цыганова Виктория")
     start_screen()
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            if (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) and SPACE_PRESS_COUNT == 0:
-                SPACE_PRESS_COUNT = 1
-                main_screen()
-        pygame.display.flip()
 
 pygame.quit()
