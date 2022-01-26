@@ -411,8 +411,9 @@ def start_screen():
              '- Чтобы это сделать, нужно нажать на корабль,', 'а затем на клетку поля, откуда будет построен кораблик',
              '- Чтобы зафиксировать местоположение всех кораблей, нажмите "w"',
              '- Тогда корабли будет расставлять PLAYER 2', '- Первым ходит PLAYER 1',
-             '- Чтобы сделать ход, нажмите на клетку, куда вы хотите выстрелить', '- После победы нажмите "пробел",',
-             'чтобы увидеть результаты игры', '- Нажмите "пробел", чтобы начать игру']
+             '- Чтобы сделать ход, нажмите на клетку, куда вы хотите выстрелить',
+             '- Вы сразу перейдете на окно результатов,',
+             'когда кто-то из игроков победит', '- Нажмите "пробел", чтобы начать игру']
     y = 15
     for elem in rules:
         if elem == 'Морской бой':
@@ -605,11 +606,11 @@ def game_window():
             if LEFT_SHIPS == 0:
                 hod = MOUSE_PRESS_RIGHT
                 WINNER = 'Player 2'
-                end_window(hod)
+                end_window()
             elif RIGHT_SHIPS == 0:
                 hod = MOUSE_PRESS_LEFT
                 WINNER = 'Player 1'
-                end_window(hod)
+                end_window()
 
         BOARD1.render(screen)
         for i in range(10):
@@ -630,15 +631,16 @@ def game_window():
         pygame.display.flip()
 
 
-def end_window(hod):
-    global WINNER
+def end_window():
+    global WINNER, MOUSE_PRESS_LEFT, MOUSE_PRESS_RIGHT
     screen.fill((0, 0, 0))
     font_1 = pygame.font.Font(None, 50)
     font_2 = pygame.font.Font(None, 32)
     results = ['Результаты игры',
                f'Победил: {WINNER}',
-               f'Всего было сделано ходов: {hod}']
-
+               f'Всего было сделано ходов: ',
+               f'- Первым игроком: {MOUSE_PRESS_RIGHT}',
+               f'- Вторым игроком: {MOUSE_PRESS_LEFT}']
 
     while True:
         for event in pygame.event.get():
