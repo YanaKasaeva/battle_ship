@@ -11,6 +11,9 @@ LEFT_SHIPS = 20
 RIGHT_SHIPS = 20
 WINNER = ''
 HOD = 0
+press_count = 0
+old, new = 0, 0
+UP = 0
 
 matrix_1 = [[0] * 10 for i in range(10)]
 matrix_2 = [[0] * 10 for j in range(10)]
@@ -19,7 +22,7 @@ colors_point = [pygame.Color(255, 0, 0), pygame.Color(255, 255, 255)]
 RED_FLAG = False
 RED_FLAG_POLE = False
 UNCLICK = False
-UP = 0
+CAN = False
 
 P4_COUNT = 1
 P3_COUNT = 2
@@ -106,30 +109,33 @@ class Board():
         UNCLICK = True
         # if UP % 2 == 0:
         # error_choose()
-        if side == 'right':
-            BOARD3.on_click('', 0, 0, 0, pos)
-        elif side == 'down':
-            BOARD4.on_click('', 0, 0, 0, pos)
-        if n == 4:
-            if P4_COUNT == 0:
-                error_count_ships()
-            else:
-                self.ok_click(cell_coords, n, side, pole, pos)
-        elif n == 3:
-            if P3_COUNT == 0:
-                error_count_ships()
-            else:
-                self.ok_click(cell_coords, n, side, pole, pos)
-        elif n == 2:
-            if P2_COUNT == 0:
-                error_count_ships()
-            else:
-                self.ok_click(cell_coords, n, side, pole, pos)
-        elif n == 1:
-            if P1_COUNT == 0:
-                error_count_ships()
-            else:
-                self.ok_click(cell_coords, n, side, pole, pos)
+        if CAN:
+            if side == 'right':
+                BOARD3.on_click('', 0, 0, 0, pos)
+            elif side == 'down':
+                BOARD4.on_click('', 0, 0, 0, pos)
+            if n == 4:
+                if P4_COUNT == 0:
+                    error_count_ships()
+                else:
+                    self.ok_click(cell_coords, n, side, pole, pos)
+            elif n == 3:
+                if P3_COUNT == 0:
+                    error_count_ships()
+                else:
+                    self.ok_click(cell_coords, n, side, pole, pos)
+            elif n == 2:
+                if P2_COUNT == 0:
+                    error_count_ships()
+                else:
+                    self.ok_click(cell_coords, n, side, pole, pos)
+            elif n == 1:
+                if P1_COUNT == 0:
+                    error_count_ships()
+                else:
+                    self.ok_click(cell_coords, n, side, pole, pos)
+        else:
+            pass
 
     def ok_click(self, cell_coords, n, side, pole, pos):
         global RED_FLAG, P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT, UNCLICK
@@ -253,7 +259,6 @@ class Board():
         if self.matrix[cell[1]][cell[0]] == 4 or self.matrix[cell[1]][cell[0]] == 3:
             error_same_cell()
         elif self.matrix[cell[1]][cell[0]] == 1:
-            print('попал')
             create_particles(get_coords(cell, pole))
             self.matrix[cell[1]][cell[0]] = 4
             if pole == 1:
@@ -262,25 +267,32 @@ class Board():
                 RIGHT_SHIPS -= 1
             HOD += 1
         else:
-            print('не попал')
             self.matrix[cell[1]][cell[0]] = 3
 
     def coor_fire(self, mouse_pos, side):
         cell = self.get_cell(mouse_pos)
         if cell:
             self.fire(cell, side)
-        print(mouse_pos)
 
 
 class Board_Choose_Ship(Board):
 
     def on_click(self, cell_coords, n, side, board, pos):
-        global UNCLICK, UP
+        global UNCLICK, UP, press_count, old, CAN
         if UNCLICK:
             self.board[pos[1]][pos[0]] = 0
             UNCLICK = False
         else:
             self.board[cell_coords[1]][cell_coords[0]] = 1 - self.board[cell_coords[1]][cell_coords[0]]
+            if self.board[cell_coords[1]][cell_coords[0]] == 1 and new != old:
+                press_count += 1
+            if self.board[cell_coords[1]][cell_coords[0]] == 1:
+                CAN = True
+            else:
+                CAN = False
+        if press_count >= 2:
+            self.board[old[1]][old[0]] = 0
+            press_count -= 1
 
 
 def get_coords(cell, pole):
@@ -436,7 +448,7 @@ def boards():
 
 
 def main_screen():
-    global BOARD1, BOARD2, BOARD3, BOARD4, W_PRESS_COUNT, ALL_SPRITE
+    global BOARD1, BOARD2, BOARD3, BOARD4, W_PRESS_COUNT, ALL_SPRITE, old, new
     boards()
 
     ship1 = pygame.sprite.Sprite()
@@ -500,8 +512,10 @@ def main_screen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+            old = new
             if event.type == pygame.MOUSEBUTTONDOWN and event.pos[1] >= 495:
                 if 140 <= event.pos[0] <= 280 and 495 <= event.pos[1] <= 530:
+                    new = BOARD3.get_cell(event.pos)
                     BOARD3.get_click(event.pos, 1, side, 0, pos)
                     cell = BOARD3.get_cell(event.pos)
                     if cell is None:
@@ -511,6 +525,7 @@ def main_screen():
                     side = 'right'
                     pos = BOARD3.get_cell(event.pos)
                 elif 460 <= event.pos[0] <= 600 and 495 <= event.pos[1] <= 530:
+                    new = BOARD4.get_cell(event.pos)
                     BOARD4.get_click(event.pos, 1, side, 0, pos)
                     cell = BOARD4.get_cell(event.pos)
                     if cell is None:
@@ -623,22 +638,24 @@ def end_window(hod):
     results = ['Результаты игры',
                f'Победил: {WINNER}',
                f'Всего было сделано ходов: {hod}']
-    y = 15
-    for elem in results:
-        if elem == 'Результаты игры':
-            text = font_1.render(elem, True, (0, 255, 255))
-        else:
-            text = font_2.render(elem, True, (255, 255, 255))
-        text_x = width // 2 - text.get_width() // 2
-        text_y = y
-        screen.blit(text, (text_x, text_y))
-        y += 50
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    terminate()
+
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            y = 15
+            for elem in results:
+                if elem == 'Результаты игры':
+                    text = font_1.render(elem, True, (0, 255, 255))
+                else:
+                    text = font_2.render(elem, True, (255, 255, 255))
+                text_x = width // 2 - text.get_width() // 2
+                text_y = y
                 screen.blit(text, (text_x, text_y))
-            pygame.display.flip()
+                y += 50
+
+        pygame.display.flip()
 
 
 if __name__ == '__main__':
