@@ -9,7 +9,6 @@ MOUSE_PRESS_LEFT = 0
 MOUSE_PRESS_RIGHT = 0
 LEFT_SHIPS = 20
 RIGHT_SHIPS = 20
-WINNER = ''
 HOD = 0
 press_count = 0
 old, new = 0, 0
@@ -587,7 +586,7 @@ def game_window():
     hod = font_names.render("Ходит:", True, (255, 255, 255))
     screen.blit(hod, (55, 500))
 
-    global MOUSE_PRESS_LEFT, MOUSE_PRESS_RIGHT, WINNER, HOD
+    global MOUSE_PRESS_LEFT, MOUSE_PRESS_RIGHT, HOD
     player(HOD)
 
     while True:
@@ -614,12 +613,14 @@ def game_window():
                     error_queue()
 
             if LEFT_SHIPS == 0:
-                hod = MOUSE_PRESS_RIGHT
-                WINNER = 'Player 2'
                 end_window()
+                mf = open("results.txt", 'w', encoding="utf8")
+                mf.write('Player 2')
+                mf.close()
             elif RIGHT_SHIPS == 0:
-                hod = MOUSE_PRESS_LEFT
-                WINNER = 'Player 1'
+                mf = open("results.txt", 'w', encoding="utf8")
+                mf.write('Player 1')
+                mf.close()
                 end_window()
 
         BOARD1.render(screen)
@@ -642,15 +643,19 @@ def game_window():
 
 
 def end_window():
-    global WINNER, MOUSE_PRESS_LEFT, MOUSE_PRESS_RIGHT
+    global MOUSE_PRESS_LEFT, MOUSE_PRESS_RIGHT
     screen.fill((0, 0, 0))
+
     font_1 = pygame.font.Font(None, 60)
     font_2 = pygame.font.Font(None, 42)
-    results = ['Результаты игры',
-               f'Победил: {WINNER}',
+    mf = open("results.txt", 'r', encoding="utf8")
+    winner = mf.read()
+    results = ['Результаты игры:',
+               f'Победил: {winner}',
                f'Всего было сделано ходов: ',
-               f'- Первым игроком: {MOUSE_PRESS_RIGHT}',
-               f'- Вторым игроком: {MOUSE_PRESS_LEFT}']
+               f'- Первым игроком: {MOUSE_PRESS_LEFT}',
+               f'- Вторым игроком: {MOUSE_PRESS_RIGHT}']
+    mf.close()
 
     while True:
         for event in pygame.event.get():
