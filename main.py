@@ -1,44 +1,15 @@
 import pygame
-import sys
-import os
-
-SPACE_PRESS_COUNT = 0
-W_PRESS_COUNT = 0
-MOUSE_PRESS_LEFT = 0
-MOUSE_PRESS_RIGHT = 0
-LEFT_SHIPS = 20
-RIGHT_SHIPS = 20
-HOD = 0
-press_count = 0
-old, new = 0, 0
-UP = 0
-
-matrix_1 = [[0] * 10 for i in range(10)]
-matrix_2 = [[0] * 10 for j in range(10)]
-colors_point = [pygame.Color(255, 0, 0), pygame.Color(255, 255, 255)]
-
-RED_FLAG = False
-RED_FLAG_POLE = False
-UNCLICK = False
-CAN = False
-
-P4_COUNT = 1
-P3_COUNT = 2
-P2_COUNT = 3
-P1_COUNT = 4
-
-ALL_SPRITE = pygame.sprite.Group()
-
-
-def load_image(name, color_key=None):
-    fullname = os.path.join('data', name)
-    image = pygame.image.load(fullname)
-    if color_key is not None:
-        image = image.convert()
-        if color_key == -1:
-            color_key = image.get_at((0, 0))
-        image.set_colorkey(color_key)
-    return image
+from settings import matrix_2, matrix_1, SPACE_PRESS_COUNT, W_PRESS_COUNT, CAN, P3_COUNT, P2_COUNT, P1_COUNT,\
+    P4_COUNT, UP, UNCLICK, MOUSE_PRESS_LEFT, MOUSE_PRESS_RIGHT, ALL_SPRITE, RIGHT_SHIPS, RED_FLAG, RED_FLAG_POLE, HOD,\
+    LEFT_SHIPS, old, new, colors_point, press_count
+from screen import screen, width
+from terminate import terminate
+from load_image import load_image
+from boards import boards
+from errors import error_place, error_queue, error_before_w, error_count_ships, error_same_cell,\
+    error_wrong_pole, del_error_game_window, del_error_f
+from player import player
+from draw_point import draw_point_success, draw_point_unsuccess
 
 
 class Board():
@@ -243,7 +214,6 @@ class Board():
 
 
 class Board_Choose_Ship(Board):
-
     def on_click(self, cell_coords, n, side, board, pos):
         global UNCLICK, UP, press_count, old, CAN
         if UNCLICK:
@@ -262,65 +232,14 @@ class Board_Choose_Ship(Board):
             press_count -= 1
 
 
-def get_coords(cell, pole):
-    if pole == 1:
-        x = (cell[0] + 1) * 35 + 45 - 35 // 2
-    else:
-        x = (cell[0] + 1) * 35 + 440 - 35 // 2
-    y = (cell[1] + 1) * 35 + 85 - 35 // 2
-    return x, y
-
-
-def draw_point_success(cell, pole):
-    pygame.draw.circle(screen, colors_point[0], get_coords(cell, pole), 5)
-
-
-def draw_point_unsuccess(cell, pole):
-    pygame.draw.circle(screen, colors_point[1], get_coords(cell, pole), 5)
-
-
-def del_error_f():
-    pygame.draw.rect(screen, (0, 0, 0), (0, 555, 800, 50), 0)
-
-
-def terminate():
-    pygame.quit()
-    sys.exit()
-
-
-def error_place():
-    del_error_f()
-    font = pygame.font.Font(None, 32)
-    text = font.render('Неправильная установка кораблика. Попробуйте снова', True, (255, 255, 255))
-    screen.blit(text, (85, 555))
-
-
-def error_choose():
-    del_error_f()
-    font = pygame.font.Font(None, 32)
-    text = font.render('Вы не выбрали кораблик', True, (255, 255, 255))
-    screen.blit(text, (240, 555))
-
-
-def error_count_ships():
-    del_error_f()
-    font = pygame.font.Font(None, 32)
-    text = font.render('Вы уже использовали все кораблики этого типа. Выберите другой', True, (255, 255, 255))
-    screen.blit(text, (40, 555))
-
-
-def error_wrong_pole():
-    del_error_f()
-    font = pygame.font.Font(None, 32)
-    text = font.render('Вы ставите кораблик не на свое поле', True, (255, 255, 255))
-    screen.blit(text, (230, 555))
-
-
-def error_before_w():
-    del_error_f()
-    font = pygame.font.Font(None, 32)
-    text = font.render('Вы поставили еще не все корабли', True, (255, 255, 255))
-    screen.blit(text, (240, 555))
+BOARD1 = Board(10, 10)
+BOARD1.set_view(45, 85, 35)
+BOARD2 = Board(10, 10)
+BOARD2.set_view(440, 85, 35)
+BOARD3 = Board_Choose_Ship(4, 1)
+BOARD3.set_view(140, 495, 35)
+BOARD4 = Board_Choose_Ship(4, 1)
+BOARD4.set_view(460, 495, 35)
 
 
 def hide_pole(pole):
@@ -331,42 +250,6 @@ def hide_pole(pole):
     elif pole == 2:
         BOARD2 = Board(10, 10)
         BOARD2.set_view(440, 85, 35)
-
-
-def error_queue():
-    font_names = pygame.font.SysFont('arial', 45)
-    error = font_names.render("Сейчас ходит другой игрок!", True, (255, 0, 0))
-    screen.blit(error, (140, 440))
-
-
-def del_error_game_window():
-    pygame.draw.rect(screen, (0, 0, 0), (140, 440, 580, 60), 0)
-
-
-def error_same_cell():
-    font_names = pygame.font.SysFont('arial', 45)
-    error = font_names.render("Вы уже сюда стреляли", True, (255, 0, 0))
-    screen.blit(error, (160, 440))
-
-
-def player(n):
-    pygame.draw.rect(screen, (0, 0, 0), (225, 500, 270, 100), 0)
-    font_names = pygame.font.SysFont('arial', 45)
-    if n % 2 == 0:
-        name = font_names.render("Player 1", True, (255, 255, 255))
-    else:
-        name = font_names.render("Player 2", True, (255, 255, 255))
-    screen.blit(name, (230, 500))
-
-
-BOARD1 = Board(10, 10)
-BOARD1.set_view(45, 85, 35)
-BOARD2 = Board(10, 10)
-BOARD2.set_view(440, 85, 35)
-BOARD3 = Board_Choose_Ship(4, 1)
-BOARD3.set_view(140, 495, 35)
-BOARD4 = Board_Choose_Ship(4, 1)
-BOARD4.set_view(460, 495, 35)
 
 
 def start_screen():
@@ -400,28 +283,6 @@ def start_screen():
                 SPACE_PRESS_COUNT = 1
                 main_screen()
         pygame.display.flip()
-
-
-def boards():
-    screen.fill((0, 0, 0))
-    font = pygame.font.Font(None, 46)
-    letters = 'абвгдежзик'
-    letters_x_1 = 12
-    letters_x_2 = 408
-    letters_y = 88
-    for elem in letters:
-        text = font.render(elem, True, (255, 255, 255))
-        screen.blit(text, (letters_x_1, letters_y))
-        screen.blit(text, (letters_x_2, letters_y))
-        letters_y += 35
-    text = font.render("1  2  3  4  5  6  7  8  9 10", True, (255, 255, 255))
-    screen.blit(text, (55, 55))
-    screen.blit(text, (450, 55))
-    font_names = pygame.font.SysFont('arial', 45)
-    name_1 = font_names.render("PLAYER 1", True, (0, 255, 255))
-    name_2 = font_names.render("PLAYER 2", True, (0, 255, 255))
-    screen.blit(name_1, (55, 5))
-    screen.blit(name_2, (450, 5))
 
 
 def main_screen():
@@ -645,8 +506,6 @@ def end_window():
 
 if __name__ == '__main__':
     pygame.init()
-    size = width, height = 800, 600
-    screen = pygame.display.set_mode(size)
     pygame.display.set_caption("Касаева Яна; Цыганова Виктория")
     start_screen()
 
