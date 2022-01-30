@@ -1,7 +1,6 @@
 import pygame
 import sys
 import os
-import random
 
 SPACE_PRESS_COUNT = 0
 W_PRESS_COUNT = 0
@@ -42,34 +41,6 @@ def load_image(name, color_key=None):
     return image
 
 
-class Particle(pygame.sprite.Sprite):
-    fire = [load_image("star.png")]
-    for scale in (5, 10, 20):
-        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
-
-    def __init__(self, pos, dx, dy):
-        super().__init__(ALL_SPRITE)
-        self.image = random.choice(self.fire)
-        self.rect = self.image.get_rect()
-        self.velocity = [dx, dy]
-        self.rect.x, self.rect.y = pos
-        self.gravity = 2
-
-    def update(self):
-        self.velocity[1] += self.gravity
-        self.rect.x += self.velocity[0]
-        self.rect.y += self.velocity[1]
-        if not self.rect.colliderect(screen):
-            self.kill()
-
-
-def create_particles(position):
-    particle_count = 20
-    numbers = range(-5, 6)
-    for i in range(particle_count):
-        Particle(position, random.choice(numbers), random.choice(numbers))
-
-
 class Board():
     def __init__(self, width, height):
         self.width = width
@@ -106,8 +77,6 @@ class Board():
     def on_click(self, cell_coords, n, side, pole, pos):
         global P4_COUNT, P3_COUNT, P2_COUNT, P1_COUNT, UNCLICK, UP
         UNCLICK = True
-        # if UP % 2 == 0:
-        # error_choose()
         if CAN:
             if side == 'right':
                 BOARD3.on_click('', 0, 0, 0, pos)
@@ -258,7 +227,6 @@ class Board():
         if self.matrix[cell[1]][cell[0]] == 4 or self.matrix[cell[1]][cell[0]] == 3:
             error_same_cell()
         elif self.matrix[cell[1]][cell[0]] == 1:
-            create_particles(get_coords(cell, pole))
             self.matrix[cell[1]][cell[0]] = 4
             if pole == 1:
                 LEFT_SHIPS -= 1
@@ -613,10 +581,10 @@ def game_window():
                     error_queue()
 
             if LEFT_SHIPS == 0:
-                end_window()
                 mf = open("results.txt", 'w', encoding="utf8")
                 mf.write('Player 2')
                 mf.close()
+                end_window()
             elif RIGHT_SHIPS == 0:
                 mf = open("results.txt", 'w', encoding="utf8")
                 mf.write('Player 1')
