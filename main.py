@@ -1,7 +1,7 @@
 import pygame
 from settings import matrix_2, matrix_1, SPACE_PRESS_COUNT, W_PRESS_COUNT, CAN, P3_COUNT, P2_COUNT, P1_COUNT,\
     P4_COUNT, UP, UNCLICK, MOUSE_PRESS_LEFT, MOUSE_PRESS_RIGHT, ALL_SPRITE, RIGHT_SHIPS, RED_FLAG, RED_FLAG_POLE, HOD,\
-    LEFT_SHIPS, old, new, colors_point, press_count
+    LEFT_SHIPS, old, new, colors_point, press_count, DRAGON_SPRITES
 from screen import screen, width
 from terminate import terminate
 from load_image import load_image
@@ -10,6 +10,7 @@ from errors import error_place, error_queue, error_before_w, error_count_ships, 
     error_wrong_pole, del_error_game_window, del_error_f
 from player import player
 from draw_point import draw_point_success, draw_point_unsuccess
+from animatedsprite import AnimatedSprite
 
 
 class Board():
@@ -483,23 +484,30 @@ def end_window():
                f'Победил: {winner}',
                f'Всего было сделано ходов: ',
                f'- Первым игроком: {MOUSE_PRESS_LEFT}',
-               f'- Вторым игроком: {MOUSE_PRESS_RIGHT}']
+               f'- Вторым игроком: {MOUSE_PRESS_RIGHT}',
+               'Поздравляем с окончанием игры!']
     mf.close()
 
+    dragon = AnimatedSprite(load_image("pygame-8-1.png"), 8, 2, 350, 480)
+    clock = pygame.time.Clock()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             y = 35
             for elem in results:
-                if elem == 'Результаты игры:':
+                if elem == 'Результаты игры:' or elem == 'Поздравляем с окончанием игры!':
                     text = font_1.render(elem, True, (0, 255, 255))
                 else:
                     text = font_2.render(elem, True, (255, 255, 255))
                 text_x = width // 2 - text.get_width() // 2
                 text_y = y
                 screen.blit(text, (text_x, text_y))
-                y += 100
+                y += 70
+        DRAGON_SPRITES.draw(screen)
+        DRAGON_SPRITES.update()
+        pygame.display.flip()
+        clock.tick(10)
 
         pygame.display.flip()
 

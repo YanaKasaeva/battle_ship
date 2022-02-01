@@ -27,3 +27,4 @@ P2_COUNT = 3
 P1_COUNT = 4
 
 ALL_SPRITE = pygame.sprite.Group()
+DRAGON_SPRITES = pygame.sprite.Group()
